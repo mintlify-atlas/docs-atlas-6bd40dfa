@@ -1,0 +1,260 @@
+---
+title: Client Management
+description: How to manage client profiles, intake, and data in Food For All DC
+---
+
+The Client Management system helps you track and manage all client information including personal details, delivery preferences, dietary restrictions, and contact information.
+
+## Accessing the Client Spreadsheet
+
+Navigate to the **Clients** page from the main navigation menu. This displays all client profiles in a searchable, sortable spreadsheet view.
+
+## Creating a New Client
+
+<Steps>
+  <Step title="Click Create Client">
+    Click the **+ Create Client** button in the top right corner of the Clients page.
+  </Step>
+  
+  <Step title="Fill in Basic Information">
+    Enter the client's personal details:
+    - First Name and Last Name
+    - Date of Birth
+    - Phone number (and optional alternative phone)
+    - Email address
+    - Gender
+  </Step>
+  
+  <Step title="Add Address Information">
+    Provide the complete delivery address:
+    - Street address
+    - Apartment/Unit number (address2)
+    - City, State, Zip Code
+    - Ward and Quadrant (automatically populated based on address)
+  </Step>
+  
+  <Step title="Set Household Details">
+    Enter household composition:
+    - Number of Adults
+    - Number of Children
+    - Number of Seniors
+    - Head of Household (Adult or Senior)
+  </Step>
+  
+  <Step title="Configure Delivery Preferences">
+    Set up delivery details:
+    - Delivery frequency (Weekly, 2x-Monthly, Monthly)
+    - Delivery instructions (gate codes, access notes, etc.)
+    - Start and end dates for delivery service
+  </Step>
+  
+  <Step title="Add Dietary Restrictions">
+    Select any applicable dietary restrictions or preferences:
+    - Medical restrictions (Kidney Friendly, Heart Friendly, Low Sodium, Low Sugar, Soft Food)
+    - Religious/Lifestyle (Halal, Vegan, Vegetarian)
+    - Equipment limitations (Microwave Only, No Cooking Equipment)
+    - Food allergens (select from predefined list or add custom)
+    - Dietary preferences (free-text field)
+  </Step>
+  
+  <Step title="Add Additional Information">
+    Optionally provide:
+    - Language preference
+    - Ethnicity
+    - Physical ailments (Diabetes, Hypertension, Heart Disease, Kidney Disease, Cancer)
+    - Physical disabilities
+    - Mental health conditions
+    - Life challenges and lifestyle goals
+    - Referral entity (referring organization and caseworker)
+    - TEFAP certification date
+    - Tags for categorization
+  </Step>
+  
+  <Step title="Save the Profile">
+    Click **Save** to create the client profile. The system automatically geocodes the address for route optimization.
+  </Step>
+</Steps>
+
+<Info>
+  Client profiles are automatically assigned coordinates based on their address to enable route optimization and mapping features.
+</Info>
+
+## Editing a Client Profile
+
+<Steps>
+  <Step title="Find the Client">
+    Use the search bar to locate the client by name, address, phone, or other criteria.
+  </Step>
+  
+  <Step title="Open the Profile">
+    Click on the client's name in the spreadsheet to open their full profile.
+  </Step>
+  
+  <Step title="Make Changes">
+    Update any fields as needed. All changes are timestamped for audit purposes.
+  </Step>
+  
+  <Step title="Save Changes">
+    Click **Save** to update the profile.
+  </Step>
+</Steps>
+
+## Searching and Filtering Clients
+
+### Basic Search
+
+Type any text in the search bar to find clients. The search looks across:
+- First and last names
+- Address
+- Phone numbers
+- Email
+- Delivery instructions
+
+### Advanced Search with Key:Value Pairs
+
+Use field-specific searches for precise results:
+
+```
+name:smith
+address:"main street"
+phone:202
+dietary:vegan
+tags:priority
+```
+
+<Note>
+  Multiple search terms are combined with AND logic - all terms must match for a client to appear in results.
+</Note>
+
+### Search Keywords
+
+Supported field keywords:
+- `name:` or `firstname:` or `lastname:` - Search by client name
+- `address:` - Search by address
+- `phone:` - Search by phone number
+- `email:` - Search by email
+- `dietary:` or `dietary restrictions:` - Search dietary restrictions
+- `instructions:` or `delivery instructions:` - Search delivery notes
+- `tags:` - Search by tags
+- `notes:` - Search client notes
+- `referral:` - Search referral entity
+
+## Managing Client Data
+
+### Custom Columns
+
+You can add custom columns to view additional client information:
+
+<Steps>
+  <Step title="Click Add Column">
+    Click the **+** button in the table header.
+  </Step>
+  
+  <Step title="Select Field">
+    Choose from available fields like:
+    - Adults, Children, Seniors
+    - Delivery Frequency
+    - Ethnicity, Language
+    - Gender
+    - TEFAP Cert
+    - Tags
+    - Notes
+    - Referral Entity
+    - Date of Birth
+    - Email
+    - Dietary Preferences
+  </Step>
+  
+  <Step title="Remove Columns">
+    Click the trash icon on any custom column header to remove it.
+  </Step>
+</Steps>
+
+### Sorting
+
+Click any column header to sort by that field. Click again to reverse the sort order. The default sort is by last name (ascending).
+
+### Client Status Indicators
+
+Each client has a status indicator in the name column:
+- Green checkmark - Active client
+- Gray X - Inactive client
+
+## Exporting Client Data
+
+<Steps>
+  <Step title="Click Export">
+    Click the **Export** button in the top toolbar.
+  </Step>
+  
+  <Step title="Choose Export Type">
+    Select one of two options:
+    - **Export Query Results** - Exports only the filtered/searched clients currently visible
+    - **Export All Clients** - Exports the complete client database
+  </Step>
+  
+  <Step title="Download CSV">
+    The system generates a CSV file with all client data including:
+    - Personal information
+    - Contact details
+    - Household composition
+    - Delivery preferences
+    - Dietary restrictions
+    - Health conditions
+    - Custom fields
+  </Step>
+</Steps>
+
+## Dietary Restrictions Color Legend
+
+The client spreadsheet uses color-coded chips to quickly identify dietary needs:
+
+- **Green chips** - General dietary preferences (Vegan, Vegetarian, Halal, Kidney Friendly, etc.)
+- **Red chips** - Food allergens (requires immediate attention)
+- **Orange chips** - Other restrictions and special notes
+
+## Deleting a Client
+
+<Warning>
+  Deleting a client is permanent and cannot be undone. All associated delivery history will also be removed.
+</Warning>
+
+<Steps>
+  <Step title="Open Client Menu">
+    Click the three-dot menu icon on the client's row.
+  </Step>
+  
+  <Step title="Select Delete">
+    Choose **Delete** from the menu.
+  </Step>
+  
+  <Step title="Confirm Deletion">
+    Review the confirmation dialog and confirm to permanently delete the client.
+  </Step>
+</Steps>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Keep Information Current" icon="refresh">
+    Regularly update client information, especially delivery instructions and dietary restrictions, to ensure accurate service delivery.
+  </Card>
+  
+  <Card title="Use Tags Effectively" icon="tag">
+    Tag clients with meaningful categories (e.g., "Priority", "New", "Needs Follow-up") for easier filtering and management.
+  </Card>
+  
+  <Card title="Document Thoroughly" icon="pencil">
+    Use the Notes field to record important information about client interactions, special circumstances, or service history.
+  </Card>
+  
+  <Card title="Verify Addresses" icon="location-dot">
+    Ensure addresses are complete and accurate for successful geocoding and route optimization.
+  </Card>
+</CardGroup>
+
+## Related Features
+
+- [Calendar & Scheduling](/features/calendar-scheduling) - Schedule deliveries for clients
+- [Route Optimization](/features/route-optimization) - Optimize delivery routes using client addresses
+- [Reporting](/features/reporting) - Generate reports on client demographics and service metrics

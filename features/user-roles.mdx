@@ -1,0 +1,404 @@
+---
+title: User Roles & Permissions
+description: Explanation of user roles and permissions in Food For All DC
+---
+
+Food For All DC uses a role-based access control system to ensure users have appropriate permissions for their responsibilities. The platform supports four distinct user roles, each with specific capabilities.
+
+## User Role Types
+
+The system includes four user roles with hierarchical permissions:
+
+1. **Admin** - Full system access with user management capabilities
+2. **Manager** - Operational management access
+3. **ClientIntake** - Client data management and delivery scheduling
+4. **Driver** - Limited access for delivery drivers (view-only for assigned routes)
+
+<Info>
+  User roles are assigned when an account is created and can only be modified by Admin or Manager users.
+</Info>
+
+## Admin Role
+
+Admins have complete access to all system features and data.
+
+### Admin Capabilities
+
+<CardGroup cols={2}>
+  <Card title="Full Client Management" icon="users">
+    Create, edit, and delete client profiles with complete access to all client data fields.
+  </Card>
+  
+  <Card title="Delivery Scheduling" icon="calendar">
+    Schedule, modify, and delete deliveries for any client with full calendar access.
+  </Card>
+  
+  <Card title="Route Optimization" icon="route">
+    Generate and modify delivery routes, assign drivers, and manage clusters.
+  </Card>
+  
+  <Card title="User Management" icon="user-gear">
+    Create, edit, and delete user accounts for Admin, Manager, and ClientIntake roles.
+  </Card>
+  
+  <Card title="All Reports" icon="chart-line">
+    Generate and export all report types including Summary, Client, and Referral Agency reports.
+  </Card>
+  
+  <Card title="System Settings" icon="gears">
+    Configure system-wide settings including daily delivery limits and organizational preferences.
+  </Card>
+</CardGroup>
+
+### Admin-Specific Features
+
+**User Account Creation**
+
+Admins can create accounts for:
+- Other Admins
+- Managers  
+- ClientIntake staff
+
+**Account Management**
+- Reset user passwords
+- Deactivate/reactivate accounts
+- Modify user roles
+- View user activity logs
+
+## Manager Role
+
+Managers have operational access to most features but with limited user management capabilities.
+
+### Manager Capabilities
+
+<CardGroup cols={2}>
+  <Card title="Client Management" icon="users">
+    Create, edit, and delete client profiles with full data access.
+  </Card>
+  
+  <Card title="Delivery Scheduling" icon="calendar">
+    Full access to schedule and manage deliveries.
+  </Card>
+  
+  <Card title="Route Management" icon="route">
+    Generate routes, assign drivers, and optimize delivery clusters.
+  </Card>
+  
+  <Card title="Limited User Management" icon="user-plus">
+    Can create ClientIntake user accounts only (cannot create Admin or Manager accounts).
+  </Card>
+  
+  <Card title="All Reports" icon="chart-line">
+    Generate and export all report types.
+  </Card>
+  
+  <Card title="Daily Operations" icon="list-check">
+    Manage day-to-day operations including delivery assignments and route exports.
+  </Card>
+</CardGroup>
+
+### Manager Limitations
+
+Managers **cannot**:
+- Create Admin or Manager accounts
+- Modify system-wide settings (only Admins can)
+- Delete Admin or Manager accounts
+- Access certain audit logs
+
+## ClientIntake Role
+
+ClientIntake users focus on client management and service delivery coordination.
+
+### ClientIntake Capabilities
+
+<CardGroup cols={2}>
+  <Card title="Client Management" icon="user-plus">
+    Create and edit client profiles. Can add new clients during intake process.
+  </Card>
+  
+  <Card title="Delivery Scheduling" icon="calendar-plus">
+    Schedule deliveries for clients in the calendar system.
+  </Card>
+  
+  <Card title="Client Search" icon="magnifying-glass">
+    Search and filter clients using all available search criteria.
+  </Card>
+  
+  <Card title="Limited Reports" icon="file-chart-column">
+    Generate Client Reports and Referral Agency Reports (no access to Summary Reports).
+  </Card>
+  
+  <Card title="View Routes" icon="map">
+    View delivery routes and assignments (read-only, cannot modify routes).
+  </Card>
+  
+  <Card title="Export Data" icon="download">
+    Export client data for authorized purposes.
+  </Card>
+</CardGroup>
+
+### ClientIntake Limitations
+
+ClientIntake users **cannot**:
+- Delete client profiles
+- Create or manage user accounts
+- Generate or modify delivery routes
+- Assign drivers to routes
+- Access Summary Reports
+- Modify system settings
+- Access user management features
+
+<Note>
+  ClientIntake is the most common role for front-line staff who manage client intake and basic scheduling.
+</Note>
+
+## Driver Role
+
+Drivers have minimal access, focused on viewing their assigned routes and delivery information.
+
+### Driver Capabilities
+
+<CardGroup cols={2}>
+  <Card title="View Assigned Routes" icon="map-location-dot">
+    See only the routes and deliveries assigned to them for each day.
+  </Card>
+  
+  <Card title="Client Details" icon="address-card">
+    View client names, addresses, and delivery instructions for assigned deliveries only.
+  </Card>
+  
+  <Card title="Dietary Information" icon="utensils">
+    Access dietary restrictions and special handling requirements for deliveries.
+  </Card>
+  
+  <Card title="Route Export" icon="file-export">
+    Export their own route information for use in navigation apps.
+  </Card>
+</CardGroup>
+
+### Driver Limitations
+
+Drivers **cannot**:
+- Create or edit client profiles
+- Schedule or modify deliveries
+- View clients not assigned to their routes
+- Access any reports
+- View other drivers' routes
+- Access user management
+- Modify route assignments
+
+<Info>
+  The Driver role is designed for maximum privacy and minimal system complexity, allowing drivers to focus solely on completing deliveries.
+</Info>
+
+## Permission Matrix
+
+Here's a quick reference for role permissions:
+
+| Feature | Admin | Manager | ClientIntake | Driver |
+|---------|-------|---------|--------------|--------|
+| Create Clients | ✓ | ✓ | ✓ | ✗ |
+| Edit Clients | ✓ | ✓ | ✓ | ✗ |
+| Delete Clients | ✓ | ✓ | ✗ | ✗ |
+| Schedule Deliveries | ✓ | ✓ | ✓ | ✗ |
+| Generate Routes | ✓ | ✓ | ✗ | ✗ |
+| Assign Drivers | ✓ | ✓ | ✗ | ✗ |
+| View All Routes | ✓ | ✓ | ✓ (read-only) | ✗ |
+| View Own Routes | ✓ | ✓ | ✓ | ✓ |
+| Summary Reports | ✓ | ✓ | ✗ | ✗ |
+| Client Reports | ✓ | ✓ | ✓ | ✗ |
+| Referral Reports | ✓ | ✓ | ✓ | ✗ |
+| Create Admin Users | ✓ | ✗ | ✗ | ✗ |
+| Create Manager Users | ✓ | ✗ | ✗ | ✗ |
+| Create ClientIntake Users | ✓ | ✓ | ✗ | ✗ |
+| System Settings | ✓ | ✗ | ✗ | ✗ |
+
+## Managing User Accounts
+
+### Creating New Users
+
+Only Admin and Manager users can create new accounts:
+
+<Steps>
+  <Step title="Navigate to Users">
+    Click **Users** in the main navigation menu.
+    
+    <Note>This option only appears for Admin and Manager users.</Note>
+  </Step>
+  
+  <Step title="Click Create User">
+    Click the **+ Create User** button.
+  </Step>
+  
+  <Step title="Enter User Details">
+    Provide the required information:
+    - Full name
+    - Email address
+    - Phone number
+    - Role (based on your permissions)
+  </Step>
+  
+  <Step title="Set Password">
+    Either:
+    - Set an initial password (minimum 8 characters)
+    - Send password reset email to the user
+  </Step>
+  
+  <Step title="Save User">
+    Click **Save** to create the account.
+  </Step>
+</Steps>
+
+### Role Assignment Rules
+
+**Admin users can create:**
+- Admin accounts
+- Manager accounts
+- ClientIntake accounts
+
+**Manager users can create:**
+- ClientIntake accounts only
+
+**ClientIntake and Driver users:**
+- Cannot create any user accounts
+
+<Warning>
+  Be cautious when creating Admin accounts. Admins have unrestricted access to all system features and data.
+</Warning>
+
+### Modifying User Roles
+
+To change a user's role:
+
+<Steps>
+  <Step title="Open User Management">
+    Navigate to **Users** page (Admin/Manager only).
+  </Step>
+  
+  <Step title="Find User">
+    Locate the user in the users spreadsheet.
+  </Step>
+  
+  <Step title="Edit Role">
+    Click the edit icon and select the new role from the dropdown.
+  </Step>
+  
+  <Step title="Save Changes">
+    Save the changes. The user's permissions update immediately.
+  </Step>
+</Steps>
+
+<Note>
+  Users are automatically logged out when their role changes to prevent permission confusion.
+</Note>
+
+### Deactivating Users
+
+Instead of deleting user accounts, it's recommended to deactivate them:
+
+1. This preserves audit trails and historical records
+2. Accounts can be reactivated if needed
+3. Prevents accidental deletion of important user data
+
+## Security Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Principle of Least Privilege" icon="shield-halved">
+    Assign users the minimum role needed for their job functions. Don't make everyone an Admin.
+  </Card>
+  
+  <Card title="Regular Account Reviews" icon="user-check">
+    Periodically review user accounts and deactivate those who no longer need access.
+  </Card>
+  
+  <Card title="Strong Passwords" icon="key">
+    Enforce strong password requirements (minimum 8 characters, complexity).
+  </Card>
+  
+  <Card title="Audit Logging" icon="clipboard-list">
+    Admins should regularly review user activity logs for suspicious behavior.
+  </Card>
+</CardGroup>
+
+## Common Role Scenarios
+
+<Accordion title="What role should intake staff have?">
+  **ClientIntake** is appropriate for staff who:
+  - Conduct client intake interviews
+  - Enter new client data
+  - Schedule initial deliveries
+  - Don't need to manage routes or users
+  
+  If they also need to generate routes or manage other users, consider **Manager** role.
+</Accordion>
+
+<Accordion title="Should volunteer drivers have accounts?">
+  It depends on your workflow:
+  
+  **Yes, create Driver accounts if:**
+  - Drivers need to access route information directly
+  - You want drivers to export routes to navigation apps
+  - You need to track which driver accessed which information
+  
+  **No, skip Driver accounts if:**
+  - You email or print route sheets for drivers
+  - Drivers don't need system access
+  - You have a large rotating volunteer pool
+</Accordion>
+
+<Accordion title="Can I have multiple Admins?">
+  Yes, you can have multiple Admin accounts. This is recommended for:
+  - Backup access if one admin is unavailable
+  - Organizations with multiple locations/managers
+  - Continuity planning
+  
+  However, limit Admin accounts to only those who truly need full system access.
+</Accordion>
+
+<Accordion title="What happens when I change someone's role?">
+  When you change a user's role:
+  1. Their permissions update immediately
+  2. They're logged out of active sessions
+  3. They must log back in to access features for the new role
+  4. Previous actions they took remain in the system
+  5. Audit logs record the role change
+</Accordion>
+
+## Troubleshooting
+
+<Accordion title="User can't access a feature they should have">
+  Check:
+  1. The user has the correct role assigned
+  2. They've logged out and back in after a role change
+  3. The feature isn't under maintenance
+  4. Their account is active (not deactivated)
+  5. They're accessing the feature correctly (some features have specific navigation paths)
+</Accordion>
+
+<Accordion title="Can't create a new user account">
+  Verify:
+  1. You have Admin or Manager role
+  2. You're trying to create a role you have permission for (Managers can't create Admins/Managers)
+  3. The email address isn't already in use
+  4. You've filled in all required fields
+  5. The password meets minimum requirements (8 characters)
+</Accordion>
+
+<Accordion title="How do I reset a user's password?">
+  As an Admin:
+  1. Go to Users page
+  2. Find the user's account
+  3. Click Edit
+  4. Either:
+     - Set a new password directly
+     - Send a password reset email
+  5. Save changes
+  
+  The user can then log in with the new password or use the reset link.
+</Accordion>
+
+## Related Features
+
+- [Client Management](/features/client-management) - Understanding access levels for client data
+- [Route Optimization](/features/route-optimization) - Driver assignment and access
+- [Reporting](/features/reporting) - Role-based report access

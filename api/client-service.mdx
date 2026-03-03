@@ -1,0 +1,457 @@
+---
+title: 'ClientService'
+description: 'Singleton service for managing client data and Firebase operations'
+icon: 'users'
+---
+
+## Overview
+
+The `ClientService` is a singleton service that handles all client-related operations with Firebase Firestore. It provides methods for CRUD operations, real-time subscriptions, pagination, search, and specialized client data management.
+
+## Getting Started
+
+```typescript
+import { clientService } from '@/services/client-service';
+
+// The service is already instantiated as a singleton
+const client = await clientService.getClientById('client-uid');
+```
+
+## Methods
+
+### getInstance
+
+Get the singleton instance of ClientService.
+
+```typescript
+static getInstance(): ClientService
+```
+
+**Returns:** The singleton ClientService instance
+
+**Example:**
+```typescript
+import ClientService from '@/services/client-service';
+
+const service = ClientService.getInstance();
+```
+
+---
+
+### getClientById
+
+Retrieve a single client by their unique identifier.
+
+```typescript
+public async getClientById(uid: string): Promise<ClientProfile | null>
+```
+
+<ParamField path="uid" type="string" required>
+  The unique identifier of the client
+</ParamField>
+
+<ResponseField name="return" type="Promise<ClientProfile | null>">
+  Returns the client profile if found, null otherwise
+</ResponseField>
+
+**Example:**
+```typescript
+const client = await clientService.getClientById('abc123');
+if (client) {
+  console.log(`${client.firstName} ${client.lastName}`);
+}
+```
+
+**Error Handling:**
+```typescript
+try {
+  const client = await clientService.getClientById('abc123');
+} catch (error) {
+  console.error('Failed to get client:', error);
+}
+```
+
+<Note>
+This method uses automatic retry logic for transient Firebase errors.
+</Note>
+
+---
+
+### getAllClients
+
+Retrieve all clients with pagination support.
+
+```typescript
+public async getAllClients(
+  pageSize = 3000,
+  lastDoc?: any
+): Promise<{ clients: ClientProfile[]; lastDoc?: any }>
+```
+
+<ParamField path="pageSize" type="number" default="3000">
+  Number of clients to retrieve per page
+</ParamField>
+
+<ParamField path="lastDoc" type="any">
+  Last document from previous page for pagination
+</ParamField>
+
+<ResponseField name="clients" type="ClientProfile[]">
+  Array of client profiles
+</ResponseField>
+
+<ResponseField name="lastDoc" type="any">
+  Last document for pagination continuation
+</ResponseField>
+
+**Example:**
+```typescript
+// First page
+const { clients, lastDoc } = await clientService.getAllClients(100);
+
+// Next page
+if (lastDoc) {
+  const nextPage = await clientService.getAllClients(100, lastDoc);
+}
+```
+
+<Note>
+The `activeStatus` field is automatically computed based on `startDate` and `endDate`.
+</Note>
+
+---
+
+### getClientsByIds
+
+Retrieve multiple clients by their UIDs. Optimized for calendar lazy loading.
+
+```typescript
+public async getClientsByIds(uids: string[]): Promise<ClientProfile[]>
+```
+
+<ParamField path="uids" type="string[]" required>
+  Array of client UIDs to fetch
+</ParamField>
+
+<ResponseField name="return" type="Promise<ClientProfile[]>">
+  Array of client profiles (excludes clients not found)
+</ResponseField>
+
+**Example:**
+```typescript
+const clientIds = ['uid1', 'uid2', 'uid3'];
+const clients = await clientService.getClientsByIds(clientIds);
+console.log(`Fetched ${clients.length} clients`);
+```
+
+<Note>
+For batches of 10 or fewer, uses parallel fetches. For larger batches, processes in chunks of 10.
+</Note>
+
+---
+
+### searchClientsByName
+
+Search clients by name for autocomplete (returns lightweight data).
+
+```typescript
+public async searchClientsByName(
+  searchTerm: string,
+  limitCount = 50
+): Promise<Pick<ClientProfile, "uid" | "firstName" | "lastName" | "address" | "activeStatus">[]>
+```
+
+<ParamField path="searchTerm" type="string" required>
+  Name to search for (case-insensitive)
+</ParamField>
+
+<ParamField path="limitCount" type="number" default="50">
+  Maximum number of results to return
+</ParamField>
+
+<ResponseField name="return" type="Promise<Partial<ClientProfile>[]>">
+  Array of lightweight client objects with uid, firstName, lastName, address, and activeStatus
+</ResponseField>
+
+**Example:**
+```typescript
+const results = await clientService.searchClientsByName('john', 10);
+results.forEach(client => {
+  console.log(`${client.firstName} ${client.lastName} - ${client.address}`);
+});
+```
+
+<Note>
+Returns all clients sorted by name if searchTerm is empty.
+</Note>
+
+---
+
+### subscribeToAllClients
+
+Subscribe to real-time updates for all clients.
+
+```typescript
+public subscribeToAllClients(
+  onData: (clients: ClientProfile[]) => void,
+  onError?: (error: ServiceError) => void
+): () => void
+```
+
+<ParamField path="onData" type="(clients: ClientProfile[]) => void" required>
+  Callback function invoked when client data changes
+</ParamField>
+
+<ParamField path="onError" type="(error: ServiceError) => void">
+  Optional error handler for subscription errors
+</ParamField>
+
+<ResponseField name="return" type="() => void">
+  Unsubscribe function to stop listening to updates
+</ResponseField>
+
+**Example:**
+```typescript
+const unsubscribe = clientService.subscribeToAllClients(
+  (clients) => {
+    console.log(`Received ${clients.length} clients`);
+  },
+  (error) => {
+    console.error('Subscription error:', error);
+  }
+);
+
+// Later, stop listening
+unsubscribe();
+```
+
+<Warning>
+Remember to call the unsubscribe function when the component unmounts to prevent memory leaks.
+</Warning>
+
+---
+
+### updateClient
+
+Update an existing client's information.
+
+```typescript
+public async updateClient(uid: string, data: Partial<ClientProfile>): Promise<void>
+```
+
+<ParamField path="uid" type="string" required>
+  The unique identifier of the client to update
+</ParamField>
+
+<ParamField path="data" type="Partial<ClientProfile>" required>
+  Partial client data to update
+</ParamField>
+
+**Example:**
+```typescript
+await clientService.updateClient('abc123', {
+  phone: '202-555-0123',
+  email: 'newemail@example.com',
+  deliveryDetails: {
+    deliveryInstructions: 'Leave at door',
+    dietaryRestrictions: {
+      vegan: true,
+      lowSodium: true
+    }
+  }
+});
+```
+
+<Note>
+The `updatedAt` timestamp is automatically set to the current time.
+</Note>
+
+---
+
+### deleteClient
+
+Delete a client and all associated delivery events.
+
+```typescript
+public async deleteClient(uid: string): Promise<void>
+```
+
+<ParamField path="uid" type="string" required>
+  The unique identifier of the client to delete
+</ParamField>
+
+**Example:**
+```typescript
+await clientService.deleteClient('abc123');
+```
+
+<Warning>
+This operation cascades to delete all delivery events for this client. This action cannot be undone.
+</Warning>
+
+---
+
+### getAllTags
+
+Retrieve all available client tags.
+
+```typescript
+public async getAllTags(): Promise<string[]>
+```
+
+<ResponseField name="return" type="Promise<string[]>">
+  Array of tag strings
+</ResponseField>
+
+**Example:**
+```typescript
+const tags = await clientService.getAllTags();
+console.log('Available tags:', tags);
+```
+
+---
+
+### updateTags
+
+Update the global list of available tags.
+
+```typescript
+public async updateTags(tags: string[]): Promise<void>
+```
+
+<ParamField path="tags" type="string[]" required>
+  Array of tag strings
+</ParamField>
+
+**Example:**
+```typescript
+const newTags = ['VIP', 'Senior', 'Family', 'Single'];
+await clientService.updateTags(newTags);
+```
+
+<Note>
+Tags are automatically sorted alphabetically before saving.
+</Note>
+
+---
+
+### updateClientCluster
+
+Update a client's cluster assignment.
+
+```typescript
+public async updateClientCluster(uid: string, clusterId: string): Promise<void>
+```
+
+<ParamField path="uid" type="string" required>
+  The unique identifier of the client
+</ParamField>
+
+<ParamField path="clusterId" type="string" required>
+  The cluster ID to assign
+</ParamField>
+
+**Example:**
+```typescript
+await clientService.updateClientCluster('abc123', 'cluster-northwest');
+```
+
+---
+
+### updateClientCoordinates
+
+Update the geographic coordinates for a client.
+
+```typescript
+public async updateClientCoordinates(
+  clientId: string,
+  coordinates: LatLngTuple
+): Promise<void>
+```
+
+<ParamField path="clientId" type="string" required>
+  The unique identifier of the client
+</ParamField>
+
+<ParamField path="coordinates" type="LatLngTuple" required>
+  Tuple of [latitude, longitude]
+</ParamField>
+
+**Example:**
+```typescript
+await clientService.updateClientCoordinates('abc123', [38.9072, -77.0369]);
+```
+
+**Validation:**
+```typescript
+try {
+  await clientService.updateClientCoordinates('abc123', [38.9072, -77.0369]);
+} catch (error) {
+  // Throws ServiceError if clientId is missing or coordinates are invalid
+  console.error(error);
+}
+```
+
+<Note>
+The `updatedAt` timestamp is automatically set to the current time.
+</Note>
+
+---
+
+### getAllClientsForSpreadsheet
+
+Retrieve all clients formatted for spreadsheet export with delivery history.
+
+```typescript
+public async getAllClientsForSpreadsheet(
+  pageSize = 3000,
+  lastDoc?: any
+): Promise<{ clients: RowData[]; lastDoc?: any }>
+```
+
+<ParamField path="pageSize" type="number" default="3000">
+  Number of clients to retrieve per page
+</ParamField>
+
+<ParamField path="lastDoc" type="any">
+  Last document from previous page for pagination
+</ParamField>
+
+<ResponseField name="clients" type="RowData[]">
+  Array of client data formatted for spreadsheet export
+</ResponseField>
+
+<ResponseField name="lastDoc" type="any">
+  Last document for pagination continuation
+</ResponseField>
+
+**Example:**
+```typescript
+const { clients } = await clientService.getAllClientsForSpreadsheet();
+// clients include lastDeliveryDate and activeStatus fields
+```
+
+<Note>
+This method fetches all delivery events to calculate the last delivery date for each client. Use for export operations only.
+</Note>
+
+## Error Handling
+
+All methods throw `ServiceError` exceptions with descriptive messages:
+
+```typescript
+import { ServiceError } from '@/utils/serviceError';
+
+try {
+  await clientService.updateClient('uid', data);
+} catch (error) {
+  if (error instanceof ServiceError) {
+    console.error(`Error code: ${error.code}`);
+    console.error(`Error message: ${error.message}`);
+  }
+}
+```
+
+## Source Reference
+
+See the full implementation at `src/services/client-service.ts`

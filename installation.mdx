@@ -1,0 +1,599 @@
+---
+title: Installation Guide
+description: Detailed setup instructions for developers to run Food For All DC locally
+---
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed on your development machine:
+
+<CardGroup cols={2}>
+  <Card title="Node.js" icon="node-js">
+    Version 16 or higher
+    
+    Check version: `node --version`
+  </Card>
+  
+  <Card title="Python" icon="python">
+    Version 3.11 or higher
+    
+    Check version: `python3 --version`
+  </Card>
+  
+  <Card title="Firebase CLI" icon="fire">
+    For local emulation and deployment
+    
+    Install: `npm install -g firebase-tools`
+  </Card>
+  
+  <Card title="Git" icon="git-alt">
+    For version control
+    
+    Check version: `git --version`
+  </Card>
+</CardGroup>
+
+## Step 1: Clone the Repository
+
+<Steps>
+  <Step title="Clone the Project">
+    ```bash
+    git clone <your-repo-url>
+    cd food-for-all-dc
+    ```
+  </Step>
+  
+  <Step title="Navigate to the App Directory">
+    ```bash
+    cd my-app
+    ```
+    
+    All frontend code is in the `my-app` directory.
+  </Step>
+</Steps>
+
+## Step 2: Install Dependencies
+
+<Steps>
+  <Step title="Install Node Dependencies">
+    ```bash
+    npm install
+    ```
+    
+    This installs all packages from `package.json`:
+    
+    <CodeGroup>
+    ```json Key Dependencies
+    {
+      "dependencies": {
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "@mui/material": "^7.2.0",
+        "@mui/icons-material": "^7.2.0",
+        "firebase": "^11.10.0",
+        "@daypilot/daypilot-lite-react": "^3.28.0",
+        "leaflet": "^1.9.4",
+        "luxon": "^3.6.1",
+        "react-router-dom": "^6.30.3",
+        "react-virtuoso": "^4.14.1",
+        "typescript": "^4.9.5"
+      }
+    }
+    ```
+    
+    ```json Dev Dependencies
+    {
+      "devDependencies": {
+        "@typescript-eslint/eslint-plugin": "^5.5.0",
+        "@typescript-eslint/parser": "^5.5.0",
+        "eslint": "^8.51.0",
+        "prettier": "^3.3.3",
+        "@types/react": "^18.3.11",
+        "@types/leaflet": "^1.9.17",
+        "@types/luxon": "^3.6.2"
+      }
+    }
+    ```
+    </CodeGroup>
+  </Step>
+</Steps>
+
+## Step 3: Configure Firebase
+
+<Steps>
+  <Step title="Create Firebase Project">
+    1. Go to [Firebase Console](https://console.firebase.google.com/)
+    2. Create a new project or use an existing one
+    3. Enable Firestore Database
+    4. Enable Firebase Authentication (Email/Password)
+    5. Enable Cloud Functions
+  </Step>
+  
+  <Step title="Get Firebase Configuration">
+    In Firebase Console:
+    1. Go to Project Settings
+    2. Scroll to "Your apps" section
+    3. Click "Add app" and select Web
+    4. Copy the Firebase configuration object
+  </Step>
+  
+  <Step title="Configure API Keys">
+    Create or update `src/config/apiKeys.ts`:
+    
+    ```typescript src/config/apiKeys.ts
+    export const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "your-project.firebaseapp.com",
+      projectId: "your-project-id",
+      storageBucket: "your-project.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:abcdef"
+    };
+    
+    // Google Maps API key for geocoding
+    export const googleMapsApiKey = "YOUR_GOOGLE_MAPS_API_KEY";
+    ```
+    
+    <Warning>
+      Never commit API keys to version control. Add `apiKeys.ts` to `.gitignore`.
+    </Warning>
+  </Step>
+  
+  <Step title="Initialize Firebase Services">
+    The app automatically initializes Firebase services in `src/auth/firebaseConfig.ts`:
+    
+    ```typescript src/auth/firebaseConfig.ts
+    import { initializeApp, FirebaseApp } from "firebase/app";
+    import { getFirestore, Firestore } from "firebase/firestore";
+    import { getAuth, Auth } from "firebase/auth";
+    import { getFunctions, Functions } from "firebase/functions";
+    import { firebaseConfig } from "../config/apiKeys";
+    
+    const app: FirebaseApp = initializeApp(firebaseConfig);
+    
+    export const db = getFirestore(app);
+    export const auth = getAuth(app);
+    export const functions = getFunctions(app);
+    
+    // Enable device language for auth
+    auth.useDeviceLanguage();
+    ```
+  </Step>
+</Steps>
+
+## Step 4: Set Up Firestore Collections
+
+The app expects these Firestore collections (configured in `src/config/dataSources.ts`):
+
+```typescript Collection Structure
+- client-profile2        // Client profiles
+- deliveries            // Delivery events
+- drivers               // Driver information
+- caseworkers           // Referral agency contacts
+- tags                  // Client tags (single doc)
+- daily-limits          // Delivery capacity by date
+- users                 // App users and roles
+```
+
+<Note>
+  Collections are created automatically when you add the first document. No manual setup required.
+</Note>
+
+## Step 5: Set Up Python Cloud Functions
+
+<Steps>
+  <Step title="Navigate to Functions Directory">
+    ```bash
+    cd functions-python
+    ```
+  </Step>
+  
+  <Step title="Create Virtual Environment">
+    ```bash
+    python3 -m venv venv
+    source venv/bin/activate  # On Windows: venv\Scripts\activate
+    ```
+  </Step>
+  
+  <Step title="Install Python Dependencies">
+    ```bash
+    pip install -r requirements.txt
+    ```
+    
+    Key Python packages:
+    - `firebase-functions`: Cloud Functions SDK
+    - `firebase-admin`: Admin SDK for Firestore
+    - `scikit-learn`: Machine learning for clustering
+    - `numpy`: Numerical computing
+    - `googlemaps`: Geocoding API client
+  </Step>
+  
+  <Step title="Return to App Directory">
+    ```bash
+    cd ..
+    ```
+  </Step>
+</Steps>
+
+## Step 6: Run the Development Server
+
+<Steps>
+  <Step title="Start the Frontend">
+    ```bash
+    npm start
+    ```
+    
+    This runs the app in development mode.
+    
+    Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+    
+    <Note>
+      The page will reload when you make changes. You'll see lint errors in the console.
+    </Note>
+  </Step>
+  
+  <Step title="Verify the App Loads">
+    You should see the login page. The app connects to your Firebase project in production mode.
+  </Step>
+</Steps>
+
+## Step 7: Set Up Firebase Emulator (Optional)
+
+<Warning>
+  Use the Firebase Emulator for local testing only. Never use it with production data.
+</Warning>
+
+<Steps>
+  <Step title="Login to Firebase">
+    ```bash
+    firebase login
+    ```
+  </Step>
+  
+  <Step title="Initialize Firebase in Project">
+    ```bash
+    firebase init
+    ```
+    
+    Select:
+    - Firestore
+    - Functions
+    - Emulators
+    
+    Choose Python for functions language.
+  </Step>
+  
+  <Step title="Configure Emulators">
+    Edit `firebase.json` to enable emulators:
+    
+    ```json firebase.json
+    {
+      "firestore": {
+        "rules": "firestore.rules",
+        "indexes": "firestore.indexes.json"
+      },
+      "functions": {
+        "source": "functions-python"
+      },
+      "emulators": {
+        "auth": {
+          "port": 9099
+        },
+        "functions": {
+          "port": 5001
+        },
+        "firestore": {
+          "port": 8080
+        },
+        "ui": {
+          "enabled": true,
+          "port": 4000
+        }
+      }
+    }
+    ```
+  </Step>
+  
+  <Step title="Start Emulators">
+    ```bash
+    firebase emulators:start
+    ```
+    
+    Access the Emulator UI at [http://localhost:4000](http://localhost:4000)
+  </Step>
+  
+  <Step title="Connect App to Emulator">
+    Update `src/auth/firebaseConfig.ts` for development:
+    
+    ```typescript Development Mode
+    import { connectFunctionsEmulator } from "firebase/functions";
+    
+    if (process.env.NODE_ENV === "development") {
+      connectFunctionsEmulator(functions, "localhost", 5001);
+    }
+    ```
+    
+    This is already configured in the codebase.
+  </Step>
+</Steps>
+
+## Step 8: Create Your First Admin User
+
+<Steps>
+  <Step title="Create User in Firebase Console">
+    1. Go to Firebase Console > Authentication
+    2. Click "Add user"
+    3. Enter email and password
+    4. Note the UID of the created user
+  </Step>
+  
+  <Step title="Add User Document to Firestore">
+    1. Go to Firestore Database
+    2. Create a document in the `users` collection
+    3. Set the document ID to the user's UID
+    4. Add fields:
+       ```json
+       {
+         "email": "admin@example.com",
+         "role": "Admin",
+         "name": "Admin User",
+         "phone": ""
+       }
+       ```
+  </Step>
+  
+  <Step title="Login to the App">
+    Use the email and password to log in. You now have admin access.
+  </Step>
+</Steps>
+
+## Available Scripts
+
+In the `my-app` directory, you can run:
+
+<CodeGroup>
+```bash Development Server
+npm start
+# Runs the app in development mode
+# Open http://localhost:3000 to view it
+```
+
+```bash Production Build
+npm run build
+# Builds the app for production to the `build` folder
+# Optimizes for best performance
+# Files are minified and hashed
+```
+
+```bash Run Linter
+npm run lint
+# Checks code for style and potential errors
+# Uses ESLint with TypeScript rules
+```
+
+```bash Fix Lint Issues
+npm run lint:fix
+# Automatically fixes linting issues where possible
+```
+
+```bash Format Code
+npm run format
+# Formats code with Prettier
+# Applies to .js, .jsx, .ts, .tsx, .json, .css files
+```
+
+```bash Analyze Bundle
+npm run analyze
+# Builds and analyzes the bundle size
+# Uses source-map-explorer
+```
+</CodeGroup>
+
+## Project Structure
+
+```
+food-for-all-dc/
+├── my-app/
+│   ├── src/
+│   │   ├── auth/              # Authentication & protected routes
+│   │   │   ├── firebaseConfig.ts
+│   │   │   ├── AuthProvider.tsx
+│   │   │   └── ProtectedRoute.tsx
+│   │   ├── components/        # Reusable UI components
+│   │   │   ├── common/        # Button, Input, Modal
+│   │   │   ├── Spreadsheet/   # Data grid components
+│   │   │   └── skeletons/     # Loading states
+│   │   ├── pages/             # Main app pages
+│   │   │   ├── Calendar/      # Calendar views and scheduling
+│   │   │   ├── Delivery/      # Route planning and optimization
+│   │   │   ├── Profile/       # Client profile management
+│   │   │   ├── Reports/       # Analytics and reporting
+│   │   │   └── Login/         # Authentication pages
+│   │   ├── services/          # Business logic & API services
+│   │   │   ├── client-service.ts
+│   │   │   ├── delivery-service.ts
+│   │   │   └── driver-service.ts
+│   │   ├── context/           # React context providers
+│   │   ├── hooks/             # Custom React hooks
+│   │   ├── types/             # TypeScript definitions
+│   │   ├── utils/             # Utility functions
+│   │   ├── config/            # App configuration
+│   │   └── styles/            # Global CSS and theme
+│   ├── functions-python/      # Python Cloud Functions
+│   │   ├── main.py           # Function entry points
+│   │   └── requirements.txt   # Python dependencies
+│   ├── package.json
+│   └── firebase.json
+└── README.md
+```
+
+## Key Files Explained
+
+### Authentication
+
+```typescript src/auth/ProtectedRoute.tsx
+import { Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "./AuthProvider";
+import { UserType } from "../types";
+
+interface ProtectedRouteProps {
+  allowedRoles: UserType[];
+  redirectTo?: string;
+}
+
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  allowedRoles,
+  redirectTo = "/",
+  children,
+}) => {
+  const { userRole, loading } = useAuth();
+  
+  if (loading) {
+    return <LoadingIndicator />;
+  }
+  
+  if (!userRole || !allowedRoles.includes(userRole)) {
+    return <Navigate to={redirectTo} replace />;
+  }
+  
+  return children ? <>{children}</> : <Outlet />;
+};
+```
+
+### Client Service
+
+```typescript src/services/client-service.ts
+// Singleton service for client operations
+class ClientService {
+  private static instance: ClientService;
+  
+  static getInstance(): ClientService {
+    if (!ClientService.instance) {
+      ClientService.instance = new ClientService();
+    }
+    return ClientService.instance;
+  }
+  
+  async getAllClients(limit?: number): Promise<{
+    clients: ClientProfile[],
+    lastDoc: any
+  }> {
+    // Fetch clients from Firestore
+    // Returns paginated results
+  }
+  
+  async getClientsByIds(ids: string[]): Promise<ClientProfile[]> {
+    // Batch fetch specific clients
+  }
+}
+```
+
+### Type Definitions
+
+```typescript src/types/client-types.ts
+export interface ClientProfile {
+  uid: string;
+  firstName: string;
+  lastName: string;
+  address: string;
+  address2: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  phone: string;
+  email: string;
+  adults: number;
+  children: number;
+  seniors: number;
+  deliveryDetails: {
+    deliveryInstructions: string;
+    dietaryRestrictions: DietaryRestrictions;
+  };
+  tags: string[];
+  ward: string;
+  coordinates: [number, number] | [];
+  referralEntity: {
+    id: string;
+    name: string;
+    organization: string;
+  } | null;
+  // ... more fields
+}
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Firebase connection errors">
+    - Verify `apiKeys.ts` has correct Firebase config
+    - Check Firebase project permissions
+    - Ensure Firestore and Auth are enabled in Firebase Console
+    - Try clearing browser cache and restarting dev server
+  </Accordion>
+  
+  <Accordion title="npm install fails">
+    - Delete `node_modules` and `package-lock.json`
+    - Run `npm cache clean --force`
+    - Try `npm install` again
+    - Check Node.js version (must be 16+)
+  </Accordion>
+  
+  <Accordion title="Python functions not working">
+    - Verify virtual environment is activated
+    - Check Python version (must be 3.11+)
+    - Ensure all packages in `requirements.txt` are installed
+    - Check Cloud Functions logs in Firebase Console
+  </Accordion>
+  
+  <Accordion title="TypeScript errors">
+    - Run `npm run lint` to see all errors
+    - Check that all `@types/*` packages are installed
+    - Verify `tsconfig.json` is correctly configured
+    - Restart your IDE/editor
+  </Accordion>
+  
+  <Accordion title="Map not loading">
+    - Verify Google Maps API key is set in `apiKeys.ts`
+    - Enable Maps JavaScript API in Google Cloud Console
+    - Check browser console for errors
+    - Ensure coordinates are valid [lat, lng] format
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Code Standards" icon="code">
+    Review the [Contributing Guide](https://github.com/your-repo/CONTRIBUTING.md) for code style and best practices
+  </Card>
+  
+  <Card title="Style Guide" icon="palette">
+    See [STYLING.md](https://github.com/your-repo/my-app/STYLING.md) for CSS Modules and theming
+  </Card>
+  
+  <Card title="Cursor Rules" icon="wand-magic-sparkles">
+    Check [.cursorrules](https://github.com/your-repo/.cursorrules) for architecture patterns
+  </Card>
+  
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Learn how to use the platform as an end user
+  </Card>
+</CardGroup>
+
+## Development Tips
+
+<Tip>
+  **Use the React DevTools browser extension** to inspect component state and props during development.
+</Tip>
+
+<Tip>
+  **Enable Firestore offline persistence** in production to improve performance and support offline use.
+</Tip>
+
+<Tip>
+  **Use the Performance Profiler** (`src/services/performance-monitor.ts`) to identify slow components and optimize rendering.
+</Tip>
+
+<Warning>
+  **Never commit sensitive data**: Always add API keys, credentials, and `.env` files to `.gitignore`.
+</Warning>

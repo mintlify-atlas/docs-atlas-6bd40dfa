@@ -1,0 +1,287 @@
+---
+title: Client Intake
+description: Step-by-step guide for adding new clients to the Food For All DC system
+---
+
+## Overview
+
+The client intake process captures essential information about households receiving food deliveries. This guide walks you through creating a complete client profile from start to finish.
+
+## Starting a New Client Profile
+
+<Steps>
+  <Step title="Navigate to the Clients page">
+    Click on **Clients** in the main navigation menu.
+  </Step>
+
+  <Step title="Create a new profile">
+    Click the **Add Client** or **New Profile** button to open a blank client form.
+  </Step>
+</Steps>
+
+<Note>
+The form will be in edit mode automatically for new profiles. All required fields must be completed before you can save.
+</Note>
+
+## Required Information
+
+### Basic Information
+
+Complete these essential fields first:
+
+<Steps>
+  <Step title="Enter client name">
+    - **First Name** - Client's legal first name (required)
+    - **Last Name** - Client's legal last name (required)
+  </Step>
+
+  <Step title="Enter contact information">
+    - **Phone** - Primary contact number (required, minimum 10 digits)
+    - **Alternative Phone** - Secondary contact number (optional)
+    - **Email** - Email address (optional, but must be valid format if provided)
+  </Step>
+
+  <Step title="Enter address information">
+    - **Address** - Street address including apartment/unit number (required)
+    - **Address 2** - Additional address details (optional)
+    - **City** - City name (required)
+    - **State** - Must be DC, MD, or VA (required)
+    - **ZIP Code** - 5-digit postal code (required)
+  </Step>
+</Steps>
+
+<Warning>
+The system will automatically validate the address and calculate the ward. Make sure to select a valid address from Google Places suggestions when typing.
+</Warning>
+
+### Household Composition
+
+Enter the number of people in the household:
+
+<Steps>
+  <Step title="Enter household members">
+    - **Adults** - Number of adults (18-64 years)
+    - **Seniors** - Number of seniors (65+ years)
+    - **Children** - Number of children (under 18 years)
+  </Step>
+
+  <Step title="Identify head of household">
+    - **Head of Household** - Select either "Adult" or "Senior"
+    - Must match the household composition (can't select "Senior" if seniors = 0)
+  </Step>
+</Steps>
+
+<Note>
+At least one adult or senior is required. The total household size is automatically calculated.
+</Note>
+
+### Demographics
+
+<Steps>
+  <Step title="Enter demographic information">
+    - **Date of Birth** - Client's date of birth (format: MM/DD/YYYY)
+    - **Gender** - Select from available options
+    - **Ethnicity** - Select from available options (required)
+    - **Language** - Primary language spoken (required)
+  </Step>
+</Steps>
+
+### Delivery Schedule
+
+<Steps>
+  <Step title="Set delivery dates">
+    - **Start Date** - First delivery date (format: MM/DD/YYYY, required)
+    - **End Date** - Last scheduled delivery date (format: MM/DD/YYYY, required)
+    - **Recurrence** - Select delivery frequency: None, Weekly, Bi-Weekly, Monthly, or Custom (required)
+  </Step>
+</Steps>
+
+### Referral Information
+
+<Steps>
+  <Step title="Select referral source">
+    - **Referral Entity** - Choose the organization or case worker who referred the client (required)
+    - **Referred Date** - Date client was referred (optional)
+    - **TEFAP Cert** - TEFAP certification date if applicable (optional, cannot be in the future)
+  </Step>
+</Steps>
+
+<Tip>
+If you need to add a new case worker or referral agency, click the **Manage Case Workers** button to add them before completing the intake.
+</Tip>
+
+## Optional Information
+
+### Delivery Instructions
+
+<Steps>
+  <Step title="Add delivery details">
+    Enter specific instructions for drivers such as:
+    - Gate codes or building access information
+    - Preferred delivery location
+    - Special handling instructions
+    - Contact preferences
+  </Step>
+</Steps>
+
+### Dietary Restrictions
+
+Select all applicable dietary needs:
+
+- Low Sugar (Diabetes Friendly)
+- Kidney Friendly
+- Vegan
+- Vegetarian
+- Halal
+- Microwave Only
+- Soft Food
+- Low Sodium
+- No Cooking Equipment
+- Heart Friendly
+- Food Allergies (specify in the text field)
+- Other (specify in the text field)
+
+### Health Information
+
+Document any health conditions:
+
+**Physical Ailments:**
+- Diabetes
+- Hypertension
+- Heart Disease
+- Kidney Disease
+- Cancer
+- Other (specify)
+
+**Physical Disabilities:**
+- Check if applicable and specify
+
+**Mental Health Conditions:**
+- Check if applicable and specify
+
+### Additional Fields
+
+<Steps>
+  <Step title="Complete remaining sections">
+    - **Life Challenges** - Current challenges the client is facing
+    - **Lifestyle Goals** - Client's goals and aspirations
+    - **Notes** - Any additional important information
+    - **Tags** - Add relevant tags for categorization
+  </Step>
+</Steps>
+
+## Saving the Profile
+
+<Steps>
+  <Step title="Review all information">
+    Double-check that all required fields are completed and accurate.
+  </Step>
+
+  <Step title="Save the profile">
+    Click the **Save** button at the top of the form.
+  </Step>
+
+  <Step title="Address duplicate check">
+    The system will automatically check for duplicate clients. If a match is found:
+    - Review the duplicate warning message
+    - Verify this is truly a new client
+    - If it's actually a duplicate, cancel and search for the existing profile instead
+  </Step>
+
+  <Step title="Confirm successful save">
+    A confirmation message will appear, and a unique 12-digit Client ID will be generated.
+  </Step>
+</Steps>
+
+<Warning>
+The system prevents duplicate clients based on matching name and address. If you receive a duplicate error, search for the existing client profile before proceeding.
+</Warning>
+
+## After Creating the Profile
+
+Once saved, you can:
+
+- **Schedule Deliveries** - Click "Add Delivery" to create delivery events
+- **View Delivery History** - See past and upcoming deliveries
+- **Edit Information** - Click the Edit button to update client details
+- **Add Tags** - Categorize the client for reporting and filtering
+
+## Validation Rules
+
+<Warning>
+The following will prevent saving:
+</Warning>
+
+- Missing required fields (First Name, Last Name, Address, City, State, ZIP, Phone, Gender, Ethnicity, Language)
+- Invalid email format
+- Invalid phone number format (must have at least 10 digits)
+- State not DC, MD, or VA
+- TEFAP cert date in the future
+- No adults or seniors in household
+- Head of household doesn't match household composition
+- Missing referral entity
+- Duplicate client (same name and address)
+
+## Phone Number Formats
+
+Accepted phone number formats:
+- (123) 456-7890
+- 123-456-7890
+- 123.456.7890
+- 123 456 7890
+- 1234567890
+- +1 123-456-7890
+
+<Tip>
+The system will automatically format and validate phone numbers as you type.
+</Tip>
+
+## Best Practices
+
+<Steps>
+  <Step title="Verify information with the client">
+    Confirm all details directly with the client or referral source when possible.
+  </Step>
+
+  <Step title="Be thorough with delivery instructions">
+    Detailed delivery instructions help drivers complete deliveries successfully.
+  </Step>
+
+  <Step title="Document dietary restrictions carefully">
+    Accurate dietary information ensures clients receive appropriate food.
+  </Step>
+
+  <Step title="Use tags consistently">
+    Apply tags systematically to make searching and reporting more effective.
+  </Step>
+
+  <Step title="Keep notes professional">
+    Document relevant information while maintaining client dignity and privacy.
+  </Step>
+</Steps>
+
+## Editing Existing Profiles
+
+To update a client profile:
+
+<Steps>
+  <Step title="Find the client">
+    Search for and open the client's profile.
+  </Step>
+
+  <Step title="Enter edit mode">
+    Click the **Edit** button (pencil icon) at the top of the profile.
+  </Step>
+
+  <Step title="Make changes">
+    Update the necessary fields. The form follows the same validation rules as new profiles.
+  </Step>
+
+  <Step title="Save changes">
+    Click **Save** to update the profile.
+  </Step>
+</Steps>
+
+<Note>
+Changes to certain fields (notes, delivery instructions, life challenges, lifestyle goals) are timestamped automatically to maintain an audit trail.
+</Note>

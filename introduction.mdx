@@ -1,0 +1,125 @@
+---
+title: Welcome to Food For All DC
+description: A modern SaaS platform for client management and delivery scheduling that serves the community
+---
+
+## Modernizing Food Delivery for Our Community
+
+Food For All DC is a comprehensive client management and delivery scheduling platform built specifically for nonprofit food delivery operations. The platform streamlines the entire workflow from client intake to route optimization, making it easier to serve those in need.
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Client Profile Management" icon="users">
+    Complete client intake system with demographic data, dietary restrictions, health conditions, and delivery preferences. Track client status, referral sources, and maintain detailed notes with automatic timestamps.
+  </Card>
+  
+  <Card title="Interactive Calendar" icon="calendar">
+    Day and month views for delivery scheduling with capacity tracking. Support for recurring deliveries, custom date selections, and real-time event management with driver assignments.
+  </Card>
+  
+  <Card title="Route Optimization" icon="route">
+    Intelligent clustering algorithms group deliveries by geographic proximity. Assign drivers and time slots, view routes on interactive maps, and export optimized delivery instructions.
+  </Card>
+  
+  <Card title="Comprehensive Reporting" icon="chart-line">
+    Generate summary reports, client activity reports, and referral agency analytics. Filter by date ranges and export data for external analysis.
+  </Card>
+</CardGroup>
+
+## Platform Highlights
+
+### Powerful Client Management
+- **Intake Forms**: Capture complete client information including demographics, household size, dietary needs, and health conditions
+- **Address Validation**: Automatic geocoding with DC ward assignment
+- **Duplicate Detection**: Prevent duplicate client records with intelligent name and address matching
+- **Tag System**: Organize clients with custom tags for easy filtering and segmentation
+- **Delivery History**: View past and future deliveries for each client
+
+### Smart Scheduling
+- **Recurring Deliveries**: Set up weekly, bi-weekly, or monthly delivery schedules
+- **Capacity Management**: Configure daily limits by day of week with visual warnings
+- **Custom Dates**: Select specific delivery dates for one-time or irregular schedules
+- **Real-time Updates**: Calendar automatically reflects changes across all views
+
+### Route Planning
+- **Automated Clustering**: K-means algorithm groups deliveries by location
+- **Visual Maps**: Interactive Leaflet maps with color-coded clusters
+- **Driver Assignment**: Assign drivers and time slots to delivery groups
+- **Export Options**: Generate route sheets for drivers or DoorDash CSV files
+
+### Role-Based Access Control
+
+The platform supports four user roles with different permission levels:
+
+<CodeGroup>
+```typescript Admin Role
+// Admins have full access to all features
+UserType.Admin
+// Can create: Admin, Manager, ClientIntake users
+// Access: All pages, user management, settings
+```
+
+```typescript Manager Role
+UserType.Manager
+// Can create: ClientIntake users only
+// Access: Calendar, delivery routes, reports, client management
+```
+
+```typescript ClientIntake Role
+UserType.ClientIntake
+// Cannot create users
+// Access: Client profiles, intake forms, basic calendar view
+```
+
+```typescript Driver Role
+UserType.Driver
+// Cannot create users
+// Access: Assigned delivery routes (read-only)
+```
+</CodeGroup>
+
+## Technology Stack
+
+### Frontend
+- **React 18** with TypeScript for type-safe development
+- **Material-UI (MUI v7)** for modern, accessible components
+- **DayPilot Calendar** for interactive scheduling
+- **Leaflet** for mapping and route visualization
+- **React Virtuoso** for high-performance data tables
+- **Luxon** for robust date/time handling
+
+### Backend & Services
+- **Firebase Firestore** for real-time database
+- **Firebase Authentication** for secure user management
+- **Python Cloud Functions** for:
+  - Geocoding addresses to coordinates
+  - Clustering deliveries for route optimization
+  - User account management
+  - Scheduled daily delivery updates
+
+## Get Started
+
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Get up and running with Food For All DC in minutes
+  </Card>
+  
+  <Card title="Installation Guide" icon="download" href="/installation">
+    Detailed setup instructions for developers
+  </Card>
+</CardGroup>
+
+## Security & Compliance
+
+<Note>
+  The platform includes client-side route protection via `ProtectedRoute` components, role-based access control, and secure environment variable management for sensitive configuration.
+</Note>
+
+<Warning>
+  All client data is protected with Firebase security rules. Passwords must be at least 8 characters. Always use the Firebase Emulator for local testing.
+</Warning>
+
+## Support
+
+For questions or issues, please reach out via [GitHub Issues](https://github.com/your-repo/issues).

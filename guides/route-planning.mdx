@@ -1,0 +1,393 @@
+---
+title: Route Planning
+description: Learn how to plan and optimize delivery routes using clusters and driver assignments
+---
+
+## Overview
+
+Route planning helps organize deliveries efficiently by grouping nearby addresses into clusters and assigning them to drivers. This guide covers the complete route planning workflow.
+
+## Accessing the Delivery Spreadsheet
+
+<Steps>
+  <Step title="Navigate to the Delivery page">
+    Click **Deliveries** or **Routes** in the main navigation menu.
+  </Step>
+
+  <Step title="Select a date">
+    Use the date picker to choose the delivery day you want to plan routes for.
+  </Step>
+
+  <Step title="View delivery list">
+    The spreadsheet displays all deliveries scheduled for the selected date with:
+    - Client names and addresses
+    - Phone numbers
+    - Delivery instructions
+    - Dietary restrictions
+    - Current cluster and driver assignments
+  </Step>
+</Steps>
+
+## Understanding Clusters
+
+Clusters are groups of deliveries that are geographically close to each other:
+
+- Each cluster is identified by a number and color
+- Deliveries in the same cluster are typically on the same route
+- One driver is assigned to each cluster
+- Each cluster has a designated delivery time window
+
+<Note>
+Clusters are automatically generated based on geographic proximity to create efficient routes.
+</Note>
+
+## Generating Clusters Automatically
+
+<Steps>
+  <Step title="Click Generate Clusters">
+    Click the **Generate Clusters** button (cluster icon) in the toolbar.
+  </Step>
+
+  <Step title="Enter number of clusters">
+    In the popup dialog:
+    - Enter the number of clusters you want to create
+    - This typically matches the number of available drivers
+    - Consider the total number of deliveries when deciding
+  </Step>
+
+  <Step title="Confirm generation">
+    Click **Generate** to create the clusters.
+  </Step>
+
+  <Step title="Review results">
+    The system will:
+    - Automatically group deliveries by location
+    - Assign a unique color to each cluster
+    - Display clusters on the map
+    - Update the Cluster ID column in the spreadsheet
+  </Step>
+</Steps>
+
+<Warning>
+Generating new clusters will overwrite any existing cluster assignments. Make sure to save your work before regenerating.
+</Warning>
+
+## Viewing Routes on the Map
+
+The cluster map shows:
+
+- **Colored markers** - Each delivery location marked with its cluster color
+- **Cluster groupings** - Visual representation of how deliveries are grouped
+- **Geographic spread** - Overall distribution of deliveries across the service area
+
+<Steps>
+  <Step title="Toggle map visibility">
+    Click the map icon to show or hide the cluster map.
+  </Step>
+
+  <Step title="Interact with markers">
+    - Click on any marker to see client details
+    - Zoom in/out to view specific neighborhoods
+    - Pan around to see the full delivery area
+  </Step>
+</Steps>
+
+<Tip>
+Use the map to verify that clusters make geographic sense before assigning drivers.
+</Tip>
+
+## Assigning Drivers to Clusters
+
+<Steps>
+  <Step title="Select deliveries">
+    Check the boxes next to all deliveries in the cluster you want to assign a driver to, or select the entire cluster.
+  </Step>
+
+  <Step title="Click Assign Driver">
+    Click the **Assign Driver** button (person icon) in the toolbar.
+  </Step>
+
+  <Step title="Choose a driver">
+    In the popup dialog:
+    - Select a driver from the dropdown list
+    - Review the selected deliveries
+  </Step>
+
+  <Step title="Confirm assignment">
+    Click **Assign** to save the driver assignment.
+  </Step>
+
+  <Step title="Verify in spreadsheet">
+    The **Assigned Driver** column will update to show the driver's name for all selected deliveries.
+  </Step>
+</Steps>
+
+## Assigning Delivery Times
+
+<Steps>
+  <Step title="Select deliveries">
+    Check the boxes next to deliveries you want to assign a time window to.
+  </Step>
+
+  <Step title="Click Assign Time">
+    Click the **Assign Time** button (clock icon) in the toolbar.
+  </Step>
+
+  <Step title="Select a time slot">
+    Choose from available time windows:
+    - Morning slots (e.g., 9:00 AM - 10:00 AM)
+    - Afternoon slots (e.g., 1:00 PM - 2:00 PM)
+    - Custom time windows based on your configuration
+  </Step>
+
+  <Step title="Confirm assignment">
+    Click **Assign** to save the time assignment.
+  </Step>
+
+  <Step title="Review assignments">
+    The **Assigned Time** column will display the selected time window.
+  </Step>
+</Steps>
+
+<Note>
+Time assignments help drivers prioritize deliveries and provide clients with estimated arrival windows.
+</Note>
+
+## Manual Cluster Adjustments
+
+Sometimes you need to manually adjust cluster assignments:
+
+<Steps>
+  <Step title="Locate the delivery">
+    Find the delivery you want to move in the spreadsheet.
+  </Step>
+
+  <Step title="Change cluster ID">
+    Click the **Cluster ID** dropdown for that delivery and select a different cluster number.
+  </Step>
+
+  <Step title="Save changes">
+    The change is saved automatically. The delivery will now appear:
+    - With the new cluster color
+    - In the new cluster on the map
+  </Step>
+</Steps>
+
+<Tip>
+Manual adjustments are useful when a delivery would be more efficient on a different route due to special circumstances.
+</Tip>
+
+## Working with Multiple Deliveries
+
+### Bulk Selection
+
+<Steps>
+  <Step title="Select multiple deliveries">
+    Use checkboxes to select deliveries:
+    - Click individual checkboxes for specific deliveries
+    - Click the header checkbox to select all deliveries on the page
+  </Step>
+
+  <Step title="Apply bulk actions">
+    With multiple deliveries selected, you can:
+    - Assign the same driver to all
+    - Assign the same time slot to all
+    - Export selected deliveries
+  </Step>
+</Steps>
+
+### Filtering Deliveries
+
+<Steps>
+  <Step title="Use the search bar">
+    Enter search terms to filter:
+    - Client names
+    - Addresses
+    - Drivers
+    - Clusters
+    - Tags
+  </Step>
+
+  <Step title="Apply filters">
+    The spreadsheet updates in real-time to show only matching deliveries.
+  </Step>
+</Steps>
+
+## Exporting Route Information
+
+<Steps>
+  <Step title="Click Export">
+    Click the **Export** button (download icon) in the toolbar.
+  </Step>
+
+  <Step title="Choose export format">
+    Select from available options:
+    - **Standard Export** - Complete delivery information in CSV format
+    - **DoorDash Export** - Formatted for DoorDash Drive integration
+  </Step>
+
+  <Step title="Save the file">
+    The file will download automatically. You can:
+    - Share it with drivers
+    - Print route sheets
+    - Import into other routing software
+  </Step>
+</Steps>
+
+<Note>
+Exported files include all visible deliveries based on current filters and date selection.
+</Note>
+
+## Resetting Routes
+
+If you need to start over:
+
+<Steps>
+  <Step title="Click Reset">
+    Click the **Reset** button (reset icon) in the toolbar.
+  </Step>
+
+  <Step title="Confirm reset">
+    A confirmation dialog will appear. Confirm that you want to clear all cluster, driver, and time assignments.
+  </Step>
+
+  <Step title="Regenerate routes">
+    After resetting, use the Generate Clusters button to create new clusters.
+  </Step>
+</Steps>
+
+<Warning>
+Resetting routes will clear all assignments for the selected day. This action cannot be undone.
+</Warning>
+
+## Understanding the Spreadsheet Columns
+
+**Client** - Client name (clickable to open profile)
+
+**Address** - Delivery address
+
+**Phone** - Contact number
+
+**Cluster ID** - Assigned cluster number (editable)
+
+**Assigned Driver** - Driver name for this delivery
+
+**Assigned Time** - Time window for delivery
+
+**Delivery Instructions** - Special notes from client profile
+
+**Dietary Restrictions** - Food preferences and restrictions
+
+**Tags** - Client categorization tags
+
+<Tip>
+Click column headers to sort by that field. This helps organize deliveries by driver, time, or location.
+</Tip>
+
+## Route Planning Best Practices
+
+<Steps>
+  <Step title="Plan routes the day before">
+    Create and assign routes at least 24 hours in advance to give drivers time to prepare.
+  </Step>
+
+  <Step title="Balance cluster sizes">
+    Try to create clusters with similar numbers of deliveries so drivers have comparable workloads.
+  </Step>
+
+  <Step title="Consider geographic constraints">
+    Review the map to ensure clusters make sense given:
+    - Traffic patterns
+    - One-way streets
+    - Building access times
+    - Parking availability
+  </Step>
+
+  <Step title="Assign time windows strategically">
+    - Group morning deliveries together
+    - Schedule time-sensitive deliveries appropriately
+    - Consider driver schedules and availability
+  </Step>
+
+  <Step title="Review delivery instructions">
+    Check for special requirements that might affect routing:
+    - Building access codes
+    - Specific delivery times
+    - Contact-first requests
+  </Step>
+
+  <Step title="Export and share routes early">
+    Provide drivers with route information well in advance so they can plan their day.
+  </Step>
+</Steps>
+
+## Cluster Color Reference
+
+The system uses distinct colors for up to 32 clusters:
+
+- Each cluster has a unique color on the map
+- Colors help quickly identify which deliveries belong together
+- The same color scheme is used in exports and printed route sheets
+
+<Note>
+If you need more than 32 clusters, consider splitting deliveries across multiple days or creating multiple route planning sessions.
+</Note>
+
+## Handling Special Cases
+
+### Invalid Addresses
+
+Deliveries with coordinates of [0, 0] indicate address validation issues:
+
+<Steps>
+  <Step title="Identify the issue">
+    These deliveries will appear with a warning indicator.
+  </Step>
+
+  <Step title="Update the address">
+    Open the client profile and correct the address using valid Google Places suggestions.
+  </Step>
+
+  <Step title="Refresh the delivery spreadsheet">
+    The coordinates will update automatically when you return to the route planning page.
+  </Step>
+</Steps>
+
+### Last-Minute Changes
+
+If a delivery is added or canceled after routes are planned:
+
+<Steps>
+  <Step title="Add the delivery to existing cluster">
+    Manually assign the new delivery to the most appropriate cluster based on location.
+  </Step>
+
+  <Step title="Reassign driver and time">
+    Use the bulk assignment tools to match the cluster's driver and time.
+  </Step>
+
+  <Step title="Notify the driver">
+    Export updated routes and communicate changes to affected drivers.
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+**Clusters aren't generating**
+- Verify that deliveries have valid addresses with coordinates
+- Check that you've entered a reasonable number of clusters
+- Ensure there are enough deliveries to create the requested clusters
+
+**Map not displaying correctly**
+- Refresh the page
+- Check that deliveries have valid coordinates
+- Verify your internet connection
+
+**Changes not saving**
+- Ensure you have the correct permissions
+- Check your internet connection
+- Try refreshing the page and making changes again
+
+<Warning>
+If routes appear inefficient after automatic clustering, use manual adjustments to optimize based on local knowledge.
+</Warning>

@@ -1,0 +1,700 @@
+---
+title: Styling Guide
+description: CSS Modules, theme variables, and component styling patterns
+---
+
+## Quick Decision Tree
+
+Use this guide when styling components:
+
+1. **Common component exists?** → Use `Button`, `Input`, `Modal` from `src/components/common/`
+2. **Component-specific styles?** → Create `ComponentName.module.css` with CSS variables
+3. **MUI component?** → Use `sx` prop with CSS variables
+4. **Global override needed?** → Add to `src/styles/form-field-global.css` (MUI only)
+
+## CSS Variables
+
+All styling must use CSS variables defined in `src/styles/theme.css`. **Never hardcode colors, spacing, or font sizes.**
+
+### Color Variables
+
+```css
+/* Primary colors */
+--color-primary: #257E68
+--color-primary-light: #45a049
+
+/* Text colors */
+--color-text-primary: #282c34
+--color-text-secondary: #787777
+
+/* Background colors */
+--color-background-main: #ffffff
+--color-background-light: #f4f4f4
+
+/* UI colors */
+--color-border-light: #ddd
+--color-error: #ff0000
+```
+
+**Usage:**
+
+```css
+/* ComponentName.module.css */
+.container {
+  background-color: var(--color-background-main);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-light);
+}
+
+.primaryButton {
+  background-color: var(--color-primary);
+}
+```
+
+### Spacing Variables
+
+```css
+--spacing-xs: 0.3125rem;  /* 5px */
+--spacing-sm: 0.625rem;   /* 10px */
+--spacing-md: 1rem;       /* 16px */
+--spacing-lg: 1.25rem;    /* 20px */
+--spacing-xl: 2rem;       /* 32px */
+```
+
+**Usage:**
+
+```css
+.container {
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  gap: var(--spacing-sm);
+}
+
+.header {
+  padding: var(--spacing-lg) var(--spacing-xl);
+}
+```
+
+### Typography Variables
+
+```css
+--font-size-xs: 0.75rem;   /* 12px */
+--font-size-sm: 0.875rem;  /* 14px */
+--font-size-base: 1rem;    /* 16px */
+--font-size-lg: 1.25rem;   /* 20px */
+--font-size-xl: 1.5rem;    /* 24px */
+```
+
+**Usage:**
+
+```css
+.title {
+  font-size: var(--font-size-xl);
+}
+
+.body {
+  font-size: var(--font-size-base);
+}
+
+.caption {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+```
+
+### Border & Shadow Variables
+
+```css
+/* Border radius */
+--border-radius-sm: 0.3125rem;  /* 5px */
+--border-radius-md: 0.5rem;     /* 8px */
+--border-radius-lg: 1rem;       /* 16px */
+--border-radius-xl: 1.5rem;     /* 24px */
+
+/* Shadows */
+--shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+--shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+```
+
+**Usage:**
+
+```css
+.card {
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.button {
+  border-radius: var(--border-radius-sm);
+}
+```
+
+<Warning>
+Never hardcode values like `16px`, `#257E68`, or `8px`. Always use CSS variables for consistency.
+</Warning>
+
+## Common Components
+
+Before creating custom UI, always check if a common component exists. These components provide consistent styling and behavior.
+
+### Button Component
+
+**Location:** `src/components/common/Button/`
+
+```typescript
+import { Button } from '../components/common';
+
+// Primary button
+<Button variant="primary" size="medium">
+  Save
+</Button>
+
+// Secondary button
+<Button variant="secondary" size="small">
+  Cancel
+</Button>
+
+// With icon
+<Button variant="primary" icon={<SaveIcon />}>
+  Save Changes
+</Button>
+
+// Full width
+<Button variant="primary" fullWidth>
+  Submit
+</Button>
+
+// Disabled
+<Button variant="primary" disabled>
+  Loading...
+</Button>
+```
+
+**Props:**
+- `variant`: `'primary' | 'secondary' | 'danger'`
+- `size`: `'small' | 'medium' | 'large'`
+- `fullWidth`: `boolean`
+- `icon`: `ReactNode`
+- `disabled`: `boolean`
+- `onClick`: `() => void`
+
+### Input Component
+
+**Location:** `src/components/common/Input/`
+
+```typescript
+import { Input } from '../components/common';
+
+// Basic input
+<Input
+  label="First Name"
+  value={firstName}
+  onChange={setFirstName}
+/>
+
+// With error
+<Input
+  label="Email"
+  value={email}
+  onChange={setEmail}
+  error="Invalid email format"
+/>
+
+// Required field
+<Input
+  label="Phone"
+  value={phone}
+  onChange={setPhone}
+  required
+/>
+
+// Different types
+<Input type="email" label="Email" />
+<Input type="password" label="Password" />
+<Input type="number" label="Age" />
+```
+
+**Props:**
+- `label`: `string`
+- `value`: `string`
+- `onChange`: `(value: string) => void`
+- `error`: `string | undefined`
+- `required`: `boolean`
+- `type`: `'text' | 'email' | 'password' | 'number'`
+- `placeholder`: `string`
+
+### Modal Component
+
+**Location:** `src/components/common/Modal/`
+
+```typescript
+import { Modal } from '../components/common';
+
+const [isOpen, setIsOpen] = useState(false);
+
+<Modal
+  open={isOpen}
+  onClose={() => setIsOpen(false)}
+  title="Confirm Deletion"
+  actions={
+    <>
+      <Button variant="secondary" onClick={() => setIsOpen(false)}>
+        Cancel
+      </Button>
+      <Button variant="danger" onClick={handleDelete}>
+        Delete
+      </Button>
+    </>
+  }
+>
+  <p>Are you sure you want to delete this client?</p>
+</Modal>
+```
+
+**Props:**
+- `open`: `boolean`
+- `onClose`: `() => void`
+- `title`: `string`
+- `children`: `ReactNode`
+- `actions`: `ReactNode` (optional)
+- `maxWidth`: `'xs' | 'sm' | 'md' | 'lg' | 'xl'`
+
+<Info>
+Always use these common components instead of creating custom buttons, inputs, or modals. This ensures UI consistency across the app.
+</Info>
+
+## CSS Modules Pattern
+
+CSS Modules provide scoped styling for components. Each component has its own `.module.css` file.
+
+### File Structure
+
+```
+ComponentName/
+  ├── ComponentName.tsx
+  └── ComponentName.module.css
+```
+
+### Component Implementation
+
+```typescript
+// ComponentName.tsx
+import React from 'react';
+import styles from './ComponentName.module.css';
+
+const ComponentName: React.FC = () => {
+  return (
+    <div className={styles.container}>
+      <h2 className={styles.title}>Title</h2>
+      <p className={styles.body}>Body text</p>
+      <button className={styles.primaryButton}>Click me</button>
+    </div>
+  );
+};
+
+export default ComponentName;
+```
+
+### CSS Module File
+
+```css
+/* ComponentName.module.css */
+.container {
+  padding: var(--spacing-md);
+  background-color: var(--color-background-main);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.title {
+  font-size: var(--font-size-xl);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.body {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.primaryButton {
+  background-color: var(--color-primary);
+  color: white;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+}
+
+.primaryButton:hover {
+  background-color: var(--color-primary-light);
+}
+```
+
+### Combining Classes
+
+```typescript
+// Multiple classes
+<div className={`${styles.container} ${styles.highlighted}`}>
+
+// Conditional classes
+<div className={`${styles.container} ${isActive ? styles.active : ''}`}>
+
+// Using classnames library (if installed)
+import classNames from 'classnames';
+
+<div className={classNames(styles.container, {
+  [styles.active]: isActive,
+  [styles.disabled]: isDisabled,
+})}>
+```
+
+### Naming Conventions
+
+**Use camelCase for class names:**
+
+```css
+/* ✅ Good */
+.formField { }
+.submitButton { }
+.primaryButton { }
+.errorMessage { }
+
+/* ❌ Bad */
+.form-field { }
+.submit_button { }
+.PrimaryButton { }
+```
+
+**Be descriptive:**
+
+```css
+/* ✅ Good */
+.clientListContainer { }
+.deliveryCalendarHeader { }
+.errorNotification { }
+
+/* ❌ Bad */
+.container { }
+.header { }
+.notification { }
+```
+
+## Material UI Styling
+
+For Material UI components, use the `sx` prop with CSS variables.
+
+### Box Component
+
+```typescript
+import { Box } from '@mui/material';
+
+<Box sx={{ 
+  backgroundColor: 'var(--color-primary)',
+  padding: 'var(--spacing-md)',
+  borderRadius: 'var(--border-radius-lg)',
+  boxShadow: 'var(--shadow-md)',
+}}>
+  Content
+</Box>
+```
+
+### Typography Component
+
+```typescript
+import { Typography } from '@mui/material';
+
+<Typography sx={{
+  fontSize: 'var(--font-size-lg)',
+  color: 'var(--color-text-primary)',
+  marginBottom: 'var(--spacing-md)',
+}}>
+  Title
+</Typography>
+```
+
+### Button with sx
+
+```typescript
+import { Button } from '@mui/material';
+
+<Button sx={{
+  backgroundColor: 'var(--color-primary)',
+  color: 'white',
+  padding: 'var(--spacing-sm) var(--spacing-lg)',
+  borderRadius: 'var(--border-radius-sm)',
+  '&:hover': {
+    backgroundColor: 'var(--color-primary-light)',
+  },
+}}>
+  Click me
+</Button>
+```
+
+### Grid Layout
+
+```typescript
+import { Grid } from '@mui/material';
+
+<Grid container spacing={2}>
+  <Grid item xs={12} md={6}>
+    <Box sx={{ padding: 'var(--spacing-md)' }}>
+      Left column
+    </Box>
+  </Grid>
+  <Grid item xs={12} md={6}>
+    <Box sx={{ padding: 'var(--spacing-md)' }}>
+      Right column
+    </Box>
+  </Grid>
+</Grid>
+```
+
+<Note>
+Prefer the common components over direct MUI usage when possible. Use MUI `sx` prop when you need Material UI-specific components.
+</Note>
+
+## Global Styles
+
+### When to Use Global Styles
+
+Global styles should be rare. Only use them for:
+
+1. CSS variable definitions (`theme.css`)
+2. Global resets (`index.css`)
+3. MUI component overrides (`form-field-global.css`)
+
+### Global MUI Overrides
+
+**Location:** `src/styles/form-field-global.css`
+
+Use sparingly for Material UI global overrides:
+
+```css
+/* Override all MUI TextFields */
+.MuiTextField-root {
+  margin-bottom: var(--spacing-md);
+}
+
+/* Override all MUI Buttons */
+.MuiButton-root {
+  border-radius: var(--border-radius-sm);
+  text-transform: none; /* Remove uppercase */
+}
+```
+
+<Warning>
+Avoid creating global styles for component-specific styling. Use CSS Modules instead.
+</Warning>
+
+## Styling Rules
+
+### DO ✅
+
+- **Use CSS variables** from `theme.css` for all values
+- **Use CSS Modules** for component-specific styles
+- **Use common components** (`Button`, `Input`, `Modal`) when available
+- **Place `.module.css` files** next to components
+- **Name classes** using camelCase
+- **Use semantic names** that describe purpose, not appearance
+
+```css
+/* ✅ Good */
+.errorMessage {
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+}
+```
+
+### DON'T ❌
+
+- **Don't hardcode** colors, spacing, or font sizes
+- **Don't use inline styles** (except for dynamic values)
+- **Don't create global CSS** for component styles
+- **Don't use `!important`** (use CSS Modules specificity instead)
+- **Don't use pixel values** directly
+
+```css
+/* ❌ Bad */
+.error {
+  color: #ff0000;
+  font-size: 14px;
+  margin: 10px;
+}
+```
+
+## Responsive Design
+
+### Media Queries
+
+Use standard breakpoints:
+
+```css
+/* Mobile first approach */
+.container {
+  padding: var(--spacing-sm);
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+  .container {
+    padding: var(--spacing-md);
+  }
+}
+
+/* Desktop and up */
+@media (min-width: 1024px) {
+  .container {
+    padding: var(--spacing-lg);
+  }
+}
+```
+
+### MUI Grid Responsive
+
+```typescript
+<Grid container spacing={2}>
+  <Grid item xs={12} sm={6} md={4} lg={3}>
+    {/* Full width mobile, half tablet, third desktop, quarter large */}
+  </Grid>
+</Grid>
+```
+
+## Common Patterns
+
+### Card Component
+
+```css
+.card {
+  background-color: var(--color-background-main);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-lg);
+}
+```
+
+### Form Layout
+
+```css
+.formContainer {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+}
+
+.formField {
+  margin-bottom: var(--spacing-md);
+}
+
+.formActions {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+  margin-top: var(--spacing-lg);
+}
+```
+
+### List Item
+
+```css
+.listItem {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border-light);
+  cursor: pointer;
+}
+
+.listItem:hover {
+  background-color: var(--color-background-light);
+}
+
+.listItem:last-child {
+  border-bottom: none;
+}
+```
+
+### Loading State
+
+```css
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  color: var(--color-text-secondary);
+}
+```
+
+## Accessibility
+
+### Focus States
+
+```css
+.button:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+```
+
+### Color Contrast
+
+Ensure sufficient contrast ratios:
+- Normal text: 4.5:1 minimum
+- Large text: 3:1 minimum
+
+### Hover States
+
+```css
+.interactive:hover {
+  background-color: var(--color-background-light);
+  cursor: pointer;
+}
+```
+
+## Performance
+
+### Avoid Expensive Operations
+
+```css
+/* ❌ Expensive */
+.container {
+  box-shadow: 0 0 20px 10px rgba(0, 0, 0, 0.5);
+  filter: blur(10px);
+}
+
+/* ✅ Better */
+.container {
+  box-shadow: var(--shadow-md);
+}
+```
+
+### Use Transform for Animations
+
+```css
+/* ✅ Good - uses GPU */
+.animated {
+  transform: translateY(0);
+  transition: transform 0.3s ease;
+}
+
+.animated:hover {
+  transform: translateY(-2px);
+}
+
+/* ❌ Bad - causes layout recalculation */
+.animated {
+  top: 0;
+  transition: top 0.3s ease;
+}
+
+.animated:hover {
+  top: -2px;
+}
+```
+
+## Next Steps
+
+- [Architecture](/development/architecture) - System architecture overview
+- [Project Structure](/development/project-structure) - Code organization
+- [Contributing](/development/contributing) - Development workflow

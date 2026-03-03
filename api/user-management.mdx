@@ -1,0 +1,353 @@
+---
+title: "User Management Function"
+description: "Delete user accounts from Firebase Authentication and Firestore"
+---
+
+## Overview
+
+The `deleteUserAccount` callable function allows administrators and managers to delete user accounts from both Firebase Authentication and Firestore. The function enforces role-based access control to ensure only authorized users can perform deletions.
+
+## Endpoint
+
+```
+https://us-central1-food-for-all-dc-caf23.cloudfunctions.net/deleteUserAccount
+```
+
+**Type:** Firebase Callable Function  
+**Region:** `us-central1`
+
+## Authentication
+
+This is a Firebase Callable Function that automatically handles authentication. The caller must be authenticated with Firebase Auth.
+
+## Authorization
+
+**Required roles:** Admin or Manager
+
+**Permission rules:**
+- Admins can delete any non-admin user
+- Managers can delete non-admin users (but NOT other admins)
+- No user can delete their own account via this function
+- Unauthenticated requests are rejected
+
+## Request
+
+<ParamField body="uid" type="string" required>
+  The Firebase Auth UID of the user to delete.
+  
+  **Constraints:**
+  - Must be a valid string
+  - Cannot be the caller's own UID (self-deletion not allowed)
+  - User must exist in Firebase Auth
+</ParamField>
+
+### Request Example
+
+<CodeGroup>
+```javascript JavaScript/TypeScript
+import { getFunctions, httpsCallable } from 'firebase/functions';
+
+const deleteUser = async (uid) => {
+  const functions = getFunctions();
+  const deleteUserAccount = httpsCallable(functions, 'deleteUserAccount');
+  
+  try {
+    const result = await deleteUserAccount({ uid });
+    console.log(result.data.message);
+    return result.data;
+  } catch (error) {
+    console.error('Error deleting user:', error.message);
+    throw error;
+  }
+};
+
+// Usage
+await deleteUser('user-uid-to-delete');
+```
+
+```javascript React Example
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { useState } from 'react';
+
+function DeleteUserButton({ userId }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  
+  const handleDelete = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const functions = getFunctions();
+      const deleteUserAccount = httpsCallable(functions, 'deleteUserAccount');
+      const result = await deleteUserAccount({ uid: userId });
+      
+      alert(result.data.message);
+      // Refresh user list or navigate away
+    } catch (err) {
+      setError(err.message);
+      console.error('Delete failed:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  return (
+    <div>
+      <button onClick={handleDelete} disabled={loading}>
+        {loading ? 'Deleting...' : 'Delete User'}
+      </button>
+      {error && <p className="error">{error}</p>}
+    </div>
+  );
+}
+```
+
+```python Python (Admin SDK)
+from firebase_functions import https_fn
+from firebase_admin import functions
+
+def delete_user_account(uid: str):
+    """Delete a user account using the callable function."""
+    # Note: This example assumes you're calling from a backend service
+    # For client-side calls, use the Firebase Client SDK
+    
+    callable = functions.HttpsCallable('deleteUserAccount')
+    result = callable({'uid': uid})
+    return result
+
+# Usage
+delete_user_account('user-uid-to-delete')
+```
+</CodeGroup>
+
+## Response
+
+<ResponseField name="status" type="string">
+  Status of the operation. Always `"success"` for successful deletions.
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Human-readable confirmation message including the deleted user's UID.
+</ResponseField>
+
+### Success Response
+
+<CodeGroup>
+```json 200 OK
+{
+  "status": "success",
+  "message": "Successfully deleted user abc123xyz"
+}
+```
+</CodeGroup>
+
+## Error Responses
+
+Callable functions throw `HttpsError` exceptions with error codes and messages.
+
+<ResponseField name="code" type="string">
+  Firebase error code indicating the type of error.
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Human-readable error message.
+</ResponseField>
+
+### Error Examples
+
+<CodeGroup>
+```javascript UNAUTHENTICATED
+// Error code: 'unauthenticated'
+// Error message: 'Authentication required.'
+
+try {
+  await deleteUserAccount({ uid });
+} catch (error) {
+  console.log(error.code); // 'functions/unauthenticated'
+  console.log(error.message); // 'Authentication required.'
+}
+```
+
+```javascript INVALID_ARGUMENT
+// Error code: 'invalid-argument'
+// Error message: "Required parameter 'uid' is missing or invalid."
+
+try {
+  await deleteUserAccount({ uid: null });
+} catch (error) {
+  console.log(error.code); // 'functions/invalid-argument'
+}
+```
+
+```javascript PERMISSION_DENIED (Self-deletion)
+// Error code: 'permission-denied'
+// Error message: 'You cannot delete your own account.'
+
+try {
+  await deleteUserAccount({ uid: currentUser.uid });
+} catch (error) {
+  console.log(error.code); // 'functions/permission-denied'
+}
+```
+
+```javascript PERMISSION_DENIED (Insufficient role)
+// Error code: 'permission-denied'
+// Error message: 'Only Admins or Managers can delete user accounts.'
+
+try {
+  await deleteUserAccount({ uid });
+} catch (error) {
+  console.log(error.code); // 'functions/permission-denied'
+}
+```
+
+```javascript PERMISSION_DENIED (Manager deleting Admin)
+// Error code: 'permission-denied'
+// Error message: 'Managers cannot delete Admin accounts.'
+
+try {
+  await deleteUserAccount({ uid: adminUserId });
+} catch (error) {
+  console.log(error.code); // 'functions/permission-denied'
+}
+```
+
+```javascript NOT_FOUND
+// Error code: 'not-found'
+// Error message: 'User with UID abc123 not found.'
+
+try {
+  await deleteUserAccount({ uid: 'nonexistent-uid' });
+} catch (error) {
+  console.log(error.code); // 'functions/not-found'
+}
+```
+
+```javascript INTERNAL
+// Error code: 'internal'
+// Error message: 'An internal error occurred while deleting the user.'
+
+try {
+  await deleteUserAccount({ uid });
+} catch (error) {
+  console.log(error.code); // 'functions/internal'
+}
+```
+</CodeGroup>
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| `unauthenticated` | No authentication context found (user not logged in) |
+| `invalid-argument` | Missing or invalid `uid` parameter |
+| `permission-denied` | Insufficient permissions (not admin/manager, self-deletion, or manager trying to delete admin) |
+| `not-found` | User with specified UID does not exist in Firebase Auth |
+| `internal` | Unexpected server error during deletion |
+
+## CORS Configuration
+
+The function allows requests from:
+- `http://localhost:3000` (local development)
+- `https://food-for-all-dc-caf23.web.app` (production)
+- `https://food-for-all-dc-caf23.firebaseapp.com` (production)
+
+## Implementation Details
+
+**Source:** `functions-python/main.py:73`
+
+The function:
+1. Validates the caller is authenticated
+2. Validates the `uid` parameter is provided and is a string
+3. Prevents self-deletion (caller cannot delete their own account)
+4. Determines the caller's role from custom claims or Firestore `/users/{uid}` document
+5. Checks the caller has admin or manager role
+6. Determines the target user's role
+7. Prevents managers from deleting admin accounts
+8. Deletes the user from Firebase Authentication
+9. Deletes the user's Firestore document from `/users/{uid}` collection
+10. Returns success message
+
+### Role Detection
+
+The function checks for roles in the following order:
+
+**Custom claims** (checked first):
+- `role`
+- `userRole`
+- `user_type`
+- `type`
+
+**Firestore `/users/{uid}` document** (checked if no claim found):
+- `role`
+- `type`
+- `userType`
+
+Roles are normalized to lowercase and spaces replace underscores.
+
+## Deletion Process
+
+1. **Firebase Auth deletion** - User removed from Authentication
+2. **Firestore deletion** - User document removed from `/users/{uid}`
+
+**Note:** If Firestore deletion fails after Auth deletion succeeds, the function still returns success but logs a warning. The Auth account is considered the authoritative source.
+
+## Best Practices
+
+<Warning>
+  User deletion is **irreversible**. Always confirm with the user before calling this function.
+</Warning>
+
+- Implement confirmation dialogs before deletion
+- Log deletion events for audit trails
+- Consider soft-deletes (marking users as inactive) instead of hard deletes
+- Refresh user lists after successful deletion
+- Handle errors gracefully and display user-friendly messages
+
+## Example: Full Delete Flow
+
+```javascript
+import { getFunctions, httpsCallable } from 'firebase/functions';
+
+const deleteUserWithConfirmation = async (user) => {
+  // 1. Confirm deletion
+  const confirmed = window.confirm(
+    `Are you sure you want to delete ${user.email}? This action cannot be undone.`
+  );
+  
+  if (!confirmed) return;
+  
+  try {
+    // 2. Call the function
+    const functions = getFunctions();
+    const deleteUserAccount = httpsCallable(functions, 'deleteUserAccount');
+    const result = await deleteUserAccount({ uid: user.uid });
+    
+    // 3. Handle success
+    console.log('User deleted:', result.data.message);
+    
+    // 4. Update UI (refresh user list, etc.)
+    await refreshUserList();
+    
+    return result.data;
+  } catch (error) {
+    // 5. Handle specific errors
+    switch (error.code) {
+      case 'functions/permission-denied':
+        alert('You do not have permission to delete this user.');
+        break;
+      case 'functions/not-found':
+        alert('User not found.');
+        break;
+      case 'functions/unauthenticated':
+        alert('Please log in to delete users.');
+        break;
+      default:
+        alert('An error occurred. Please try again.');
+    }
+    
+    throw error;
+  }
+};
+```

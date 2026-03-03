@@ -1,0 +1,293 @@
+---
+title: Architecture
+description: System architecture overview for Food For All DC
+---
+
+## Overview
+
+Food For All DC is a modern web application built with React and Firebase, designed to streamline client management and delivery scheduling for a nonprofit serving the community.
+
+## Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Frontend (React)                        │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │   Pages      │  │  Components  │  │   Services   │     │
+│  │ - Calendar   │  │ - Common UI  │  │ - Client     │     │
+│  │ - Profile    │  │ - Spreadsheet│  │ - Delivery   │     │
+│  │ - Reports    │  │ - Forms      │  │ - Auth       │     │
+│  │ - Delivery   │  │              │  │ - Driver     │     │
+│  └──────────────┘  └──────────────┘  └──────────────┘     │
+│         │                  │                  │             │
+│         └──────────────────┼──────────────────┘             │
+│                            │                                │
+└────────────────────────────┼────────────────────────────────┘
+                             │
+                    ┌────────▼────────┐
+                    │   Firebase SDK  │
+                    └────────┬────────┘
+                             │
+┌────────────────────────────┼────────────────────────────────┐
+│                     Firebase Backend                        │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │  Firestore   │  │     Auth     │  │   Functions  │     │
+│  │ - Clients    │  │ - Email/Pass │  │  (Python)    │     │
+│  │ - Events     │  │ - Roles      │  │ - Geocoding  │     │
+│  │ - Drivers    │  │              │  │ - Clustering │     │
+│  │ - Users      │  │              │  │ - Scheduled  │     │
+│  └──────────────┘  └──────────────┘  └──────────────┘     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Frontend Architecture
+
+### Component Structure
+
+The frontend follows a modular React architecture with clear separation of concerns:
+
+```typescript
+my-app/src/
+├── pages/           // Route-level components
+├── components/      // Reusable UI components
+├── services/        // Business logic & Firebase operations
+├── context/         // Global state management
+├── hooks/           // Custom React hooks
+├── utils/           // Utility functions
+└── types/           // TypeScript definitions
+```
+
+### Service Layer
+
+All Firebase operations are encapsulated in singleton services following a consistent pattern:
+
+```typescript
+// Example: ClientService
+class ClientService {
+  private static instance: ClientService;
+
+  static getInstance(): ClientService {
+    if (!ClientService.instance) {
+      ClientService.instance = new ClientService();
+    }
+    return ClientService.instance;
+  }
+
+  async getClientById(uid: string): Promise<ClientProfile> {
+    try {
+      const docRef = doc(db, "client-profile2", uid);
+      const docSnap = await getDoc(docRef);
+      // ... implementation
+    } catch (error) {
+      throw formatServiceError(error, "Failed to fetch client");
+    }
+  }
+}
+
+// Usage
+const clientService = ClientService.getInstance();
+const client = await clientService.getClientById(uid);
+```
+
+**Available Services:**
+- `ClientService` - Client profile CRUD operations
+- `DeliveryService` - Delivery event management
+- `DriverService` - Driver management
+- `AuthUserService` - User authentication and management
+
+### State Management
+
+The app uses a hybrid state management approach:
+
+**Global State (React Context):**
+- `AuthProvider` - User authentication and role management
+- `ClientDataContext` - Client data caching and management
+- `RecurringDeliveryContext` - Recurring delivery schedules
+
+**Local State:**
+- Component state for forms and UI interactions
+- Always refresh context after mutations
+
+### Routing & Protection
+
+Routes are defined in `src/routesConfig.tsx` and protected by role-based access control:
+
+```typescript
+import { ProtectedRoute } from './auth/ProtectedRoute';
+import { UserType } from './types';
+
+<Route element={<ProtectedRoute allowedRoles={[UserType.Admin, UserType.Manager]} />}>
+  <Route path="/reports" element={<Reports />} />
+</Route>
+```
+
+**User Roles:**
+- `Admin` - Full access
+- `Manager` - Client and delivery management
+- `ClientIntake` - Client profile editing
+- `Driver` - View-only delivery access
+
+## Backend Architecture
+
+### Firebase Services
+
+#### Firestore Database
+
+**Collections:**
+- `client-profile2` - Client profiles and intake data
+- `events` - Delivery events and scheduling
+- `users` - User accounts and roles
+- `Drivers2` - Driver information
+- `clusters` - Delivery route clusters
+- `referral` - Referral agencies
+- `limits` - System limits and quotas
+- `tags` - Client tags and categories
+
+<Note>
+All Firestore writes are validated using `firestoreValidation` utilities before being committed to the database.
+</Note>
+
+#### Firebase Authentication
+
+- Email/password authentication
+- Role-based access control
+- Minimum password requirement: 8 characters
+- Client-side route protection via `ProtectedRoute`
+
+#### Cloud Functions (Python)
+
+The backend uses Python Cloud Functions for server-side operations:
+
+```python
+# functions-python/
+├── geocoding/          # Address → coordinates conversion
+├── clustering/         # Delivery route optimization
+├── user_management/    # Account deletion
+└── scheduled_tasks/    # Daily delivery updates
+```
+
+**Key Functions:**
+1. **Geocoding** - Converts client addresses to GPS coordinates for mapping
+2. **Clustering** - Optimizes delivery routes using geographic clustering algorithms
+3. **User Management** - Handles account deletion and cleanup
+4. **Scheduled Tasks** - Runs daily updates for delivery schedules
+
+### Configuration Management
+
+All API keys and sensitive configuration are centralized in `src/config/apiKeys.ts`:
+
+```typescript
+function getRequiredEnv(key: string): string {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(`Required environment variable ${key} is not set`);
+  }
+  return value;
+}
+
+export const firebaseConfig: FirebaseOptions = {
+  apiKey: getRequiredEnv("REACT_APP_FIREBASE_API_KEY"),
+  authDomain: getRequiredEnv("REACT_APP_FIREBASE_AUTH_DOMAIN"),
+  projectId: getRequiredEnv("REACT_APP_FIREBASE_PROJECT_ID"),
+  // ...
+};
+
+export const googleMapsApiKey = getRequiredEnv("REACT_APP_GOOGLE_MAPS_API_KEY");
+```
+
+<Warning>
+Never hardcode API keys. Always use environment variables and the centralized `apiKeys.ts` configuration.
+</Warning>
+
+## Data Flow
+
+### Typical User Flow
+
+1. **Authentication**
+   - User logs in via Firebase Auth
+   - `AuthProvider` loads user role from Firestore
+   - Routes are protected based on role
+
+2. **Data Loading**
+   - Page component mounts
+   - Service layer fetches data from Firestore
+   - Context providers cache frequently accessed data
+
+3. **User Interaction**
+   - User modifies data (e.g., edits client profile)
+   - Component validates input
+   - Service layer writes to Firestore with validation
+   - Context refreshes cached data
+   - UI updates via React state
+
+4. **Background Processing**
+   - Cloud Functions trigger on schedule or events
+   - Process geocoding, clustering, or cleanup
+   - Update Firestore collections
+   - Frontend reflects changes on next fetch
+
+## Performance Optimizations
+
+### Frontend
+
+- **Lazy Loading** - Page components loaded on-demand
+- **React.memo()** - Memoization for expensive components
+- **React Virtuoso** - Virtual scrolling for large lists (3000+ items)
+- **Caching** - Context providers cache roles and recurring deliveries (5 min TTL)
+
+### Backend
+
+- **Firestore Indexing** - Optimized queries with composite indexes
+- **Batch Operations** - Bulk writes using Firebase batch API
+- **Retry Logic** - Automatic retry for transient failures
+
+```typescript
+import { retry } from '../utils/retry';
+
+const result = await retry(() => {
+  return someOperationThatMayFail();
+});
+```
+
+## Error Handling
+
+Consistent error handling across the application:
+
+```typescript
+import { formatServiceError } from '../utils/serviceError';
+import { useNotification } from '../context/NotificationProvider';
+
+try {
+  await clientService.updateClient(data);
+} catch (error) {
+  const formattedError = formatServiceError(error, "Failed to update client");
+  showNotification(formattedError.message, "error");
+}
+```
+
+<Info>
+Always use `NotificationProvider` to display errors to users. Never use `console.log()` or `alert()` for error messaging.
+</Info>
+
+## Security
+
+### Authentication
+- Email/password authentication via Firebase Auth
+- Session management handled by Firebase SDK
+- Password minimum: 8 characters
+
+### Authorization
+- Role-based access control (RBAC)
+- Client-side route protection via `ProtectedRoute`
+- Server-side security rules in Firestore (recommended)
+
+### Data Protection
+- Environment variables for sensitive configuration
+- API keys validated at startup
+- No hardcoded credentials in source code
+
+## Next Steps
+
+- [Tech Stack](/development/tech-stack) - Detailed technology documentation
+- [Project Structure](/development/project-structure) - Code organization guide
+- [Contributing](/development/contributing) - How to contribute code

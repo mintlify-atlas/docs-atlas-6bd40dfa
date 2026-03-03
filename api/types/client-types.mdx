@@ -1,0 +1,634 @@
+---
+title: "Client Types"
+description: "TypeScript interfaces for client profiles and dietary information"
+---
+
+## Overview
+
+Client types define the structure for client profiles, dietary restrictions, and delivery details in the Food For All DC system.
+
+## ClientProfile
+
+The main interface representing a client in the system.
+
+<ResponseField name="uid" type="string" required>
+  Unique identifier for the client
+</ResponseField>
+
+<ResponseField name="firstName" type="string" required>
+  Client's first name
+</ResponseField>
+
+<ResponseField name="lastName" type="string" required>
+  Client's last name
+</ResponseField>
+
+<ResponseField name="email" type="string" required>
+  Client's email address
+</ResponseField>
+
+<ResponseField name="phone" type="string" required>
+  Primary phone number
+</ResponseField>
+
+<ResponseField name="alternativePhone" type="string" required>
+  Secondary phone number
+</ResponseField>
+
+### Address Information
+
+<ResponseField name="address" type="string" required>
+  Street address
+</ResponseField>
+
+<ResponseField name="address2" type="string" required>
+  Apartment, suite, or unit number
+</ResponseField>
+
+<ResponseField name="city" type="string" required>
+  City
+</ResponseField>
+
+<ResponseField name="state" type="string" required>
+  State
+</ResponseField>
+
+<ResponseField name="zipCode" type="string" required>
+  ZIP code
+</ResponseField>
+
+<ResponseField name="quadrant" type="string" required>
+  DC quadrant (NW, NE, SW, SE)
+</ResponseField>
+
+<ResponseField name="ward" type="string" required>
+  DC ward number
+</ResponseField>
+
+<ResponseField name="coordinates" type="[number, number] | []" required>
+  Geographic coordinates [latitude, longitude] or empty array
+</ResponseField>
+
+### Household Information
+
+<ResponseField name="adults" type="number" required>
+  Number of adults in household
+</ResponseField>
+
+<ResponseField name="children" type="number" required>
+  Number of children in household
+</ResponseField>
+
+<ResponseField name="seniors" type="number" required>
+  Number of seniors in household
+</ResponseField>
+
+<ResponseField name="total" type="number" required>
+  Total number of people in household
+</ResponseField>
+
+<ResponseField name="headOfHousehold" type="'Senior' | 'Adult'" required>
+  Type of head of household
+</ResponseField>
+
+### Personal Information
+
+<ResponseField name="dob" type="string" required>
+  Date of birth
+</ResponseField>
+
+<ResponseField name="gender" type="'Male' | 'Female' | 'Other'" required>
+  Gender identification
+</ResponseField>
+
+<ResponseField name="ethnicity" type="string" required>
+  Ethnicity
+</ResponseField>
+
+<ResponseField name="language" type="string" required>
+  Preferred language
+</ResponseField>
+
+### Delivery Information
+
+<ResponseField name="deliveryFreq" type="string" required>
+  Delivery frequency (e.g., "Weekly", "2x-Monthly", "Monthly")
+</ResponseField>
+
+<ResponseField name="deliveries" type="string[]">
+  Array of delivery IDs associated with this client
+</ResponseField>
+
+<ResponseField name="deliveryDetails" type="DeliveryDetails" required>
+  Delivery instructions and dietary restrictions
+</ResponseField>
+
+<ResponseField name="clusterID" type="string">
+  ID of the delivery cluster this client belongs to
+</ResponseField>
+
+### Dates and Timeline
+
+<ResponseField name="startDate" type="string" required>
+  Service start date
+</ResponseField>
+
+<ResponseField name="endDate" type="string" required>
+  Service end date
+</ResponseField>
+
+<ResponseField name="famStartDate" type="string | null">
+  FAM (Food As Medicine) program start date
+</ResponseField>
+
+<ResponseField name="referredDate" type="string">
+  Date client was referred to the program
+</ResponseField>
+
+<ResponseField name="recurrence" type="string" required>
+  Delivery recurrence pattern
+</ResponseField>
+
+<ResponseField name="createdAt" type="Date" required>
+  Profile creation timestamp
+</ResponseField>
+
+<ResponseField name="updatedAt" type="Date" required>
+  Last update timestamp
+</ResponseField>
+
+### Health Information
+
+<ResponseField name="physicalAilments" type="object" required>
+  Physical health conditions
+  <Expandable title="properties">
+    <ResponseField name="diabetes" type="boolean" required>
+      Has diabetes
+    </ResponseField>
+    <ResponseField name="hypertension" type="boolean" required>
+      Has hypertension
+    </ResponseField>
+    <ResponseField name="heartDisease" type="boolean" required>
+      Has heart disease
+    </ResponseField>
+    <ResponseField name="kidneyDisease" type="boolean" required>
+      Has kidney disease
+    </ResponseField>
+    <ResponseField name="cancer" type="boolean" required>
+      Has cancer
+    </ResponseField>
+    <ResponseField name="other" type="boolean" required>
+      Has other condition
+    </ResponseField>
+    <ResponseField name="otherText" type="string" required>
+      Description of other condition
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="physicalDisability" type="object" required>
+  Physical disability information
+  <Expandable title="properties">
+    <ResponseField name="other" type="boolean" required>
+      Has physical disability
+    </ResponseField>
+    <ResponseField name="otherText" type="string" required>
+      Description of disability
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="mentalHealthConditions" type="object" required>
+  Mental health information
+  <Expandable title="properties">
+    <ResponseField name="other" type="boolean" required>
+      Has mental health condition
+    </ResponseField>
+    <ResponseField name="otherText" type="string" required>
+      Description of condition
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Notes and Goals
+
+<ResponseField name="notes" type="string" required>
+  General notes about the client
+</ResponseField>
+
+<ResponseField name="notesTimestamp" type="object | null">
+  Timestamped notes
+  <Expandable title="properties">
+    <ResponseField name="notes" type="string" required>
+      Note content
+    </ResponseField>
+    <ResponseField name="timestamp" type="Date" required>
+      When note was created
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="deliveryInstructionsTimestamp" type="object | null">
+  Timestamped delivery instructions
+  <Expandable title="properties">
+    <ResponseField name="notes" type="string" required>
+      Delivery instruction content
+    </ResponseField>
+    <ResponseField name="timestamp" type="Date" required>
+      When instruction was created
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="lifeChallenges" type="string" required>
+  Client's life challenges
+</ResponseField>
+
+<ResponseField name="lifeChallengesTimestamp" type="object | null">
+  Timestamped life challenges
+  <Expandable title="properties">
+    <ResponseField name="notes" type="string" required>
+      Life challenges content
+    </ResponseField>
+    <ResponseField name="timestamp" type="Date" required>
+      When recorded
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="lifestyleGoals" type="string" required>
+  Client's lifestyle goals
+</ResponseField>
+
+<ResponseField name="lifestyleGoalsTimestamp" type="object | null">
+  Timestamped lifestyle goals
+  <Expandable title="properties">
+    <ResponseField name="notes" type="string" required>
+      Lifestyle goals content
+    </ResponseField>
+    <ResponseField name="timestamp" type="Date" required>
+      When recorded
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Additional Fields
+
+<ResponseField name="tags" type="string[]" required>
+  Tags associated with the client
+</ResponseField>
+
+<ResponseField name="tefapCert" type="string" required>
+  TEFAP certification information
+</ResponseField>
+
+<ResponseField name="activeStatus" type="boolean">
+  Whether the client is active in the system
+</ResponseField>
+
+<ResponseField name="referralEntity" type="object | null">
+  Information about the entity that referred this client
+  <Expandable title="properties">
+    <ResponseField name="id" type="string" required>
+      Referral entity ID
+    </ResponseField>
+    <ResponseField name="name" type="string" required>
+      Referral entity name
+    </ResponseField>
+    <ResponseField name="organization" type="string" required>
+      Referral organization
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="miscellaneousDynamicFields" type="{ [key: string]: string }">
+  Additional dynamic fields as key-value pairs
+</ResponseField>
+
+## DietaryRestrictions
+
+Interface for managing client dietary restrictions and preferences.
+
+<ResponseField name="lowSugar" type="boolean" required>
+  Requires low sugar diet
+</ResponseField>
+
+<ResponseField name="kidneyFriendly" type="boolean" required>
+  Requires kidney-friendly diet
+</ResponseField>
+
+<ResponseField name="vegan" type="boolean" required>
+  Follows vegan diet
+</ResponseField>
+
+<ResponseField name="vegetarian" type="boolean" required>
+  Follows vegetarian diet
+</ResponseField>
+
+<ResponseField name="halal" type="boolean" required>
+  Requires halal food
+</ResponseField>
+
+<ResponseField name="microwaveOnly" type="boolean" required>
+  Can only use microwave for cooking
+</ResponseField>
+
+<ResponseField name="softFood" type="boolean" required>
+  Requires soft food
+</ResponseField>
+
+<ResponseField name="lowSodium" type="boolean" required>
+  Requires low sodium diet
+</ResponseField>
+
+<ResponseField name="noCookingEquipment" type="boolean" required>
+  Has no cooking equipment
+</ResponseField>
+
+<ResponseField name="heartFriendly" type="boolean" required>
+  Requires heart-healthy diet
+</ResponseField>
+
+<ResponseField name="foodAllergens" type="string[]" required>
+  List of food allergens
+</ResponseField>
+
+<ResponseField name="other" type="boolean" required>
+  Has other dietary restrictions
+</ResponseField>
+
+<ResponseField name="otherText" type="string" required>
+  Description of other dietary restrictions
+</ResponseField>
+
+<ResponseField name="dietaryPreferences" type="string">
+  General dietary preferences
+</ResponseField>
+
+<ResponseField name="activeStatus" type="boolean">
+  Whether these restrictions are currently active
+</ResponseField>
+
+## DeliveryDetails
+
+Interface for delivery-specific information associated with a client.
+
+<ResponseField name="deliveryInstructions" type="string" required>
+  Special instructions for delivering to this client
+</ResponseField>
+
+<ResponseField name="dietaryRestrictions" type="DietaryRestrictions" required>
+  Client's dietary restrictions and preferences
+</ResponseField>
+
+## Type Definition
+
+```typescript
+export interface ClientProfile {
+  famStartDate?: string | null;
+  uid: string;
+  firstName: string;
+  lastName: string;
+  miscellaneousDynamicFields?: { [key: string]: string };
+  zipCode: string;
+  address: string;
+  address2: string;
+  email: string;
+  city: string;
+  state: string;
+  quadrant: string;
+  dob: string;
+  deliveryFreq: string;
+  deliveries?: string[];
+  phone: string;
+  alternativePhone: string;
+  referredDate?: string;
+  adults: number;
+  children: number;
+  total: number;
+  gender: "Male" | "Female" | "Other";
+  ethnicity: string;
+  deliveryDetails: {
+    deliveryInstructions: string;
+    dietaryRestrictions: DietaryRestrictions;
+  };
+  lifeChallenges: string;
+  notes: string;
+  notesTimestamp?: {
+    notes: string;
+    timestamp: Date;
+  } | null;
+  deliveryInstructionsTimestamp?: {
+    notes: string;
+    timestamp: Date;
+  } | null;
+  lifeChallengesTimestamp?: {
+    notes: string;
+    timestamp: Date;
+  } | null;
+  lifestyleGoalsTimestamp?: {
+    notes: string;
+    timestamp: Date;
+  } | null;
+  lifestyleGoals: string;
+  language: string;
+  createdAt: Date;
+  updatedAt: Date;
+  tags: string[];
+  ward: string;
+  coordinates: [number, number] | [];
+  seniors: number;
+  headOfHousehold: "Senior" | "Adult";
+  referralEntity?: {
+    id: string;
+    name: string;
+    organization: string;
+  } | null;
+  startDate: string;
+  endDate: string;
+  recurrence: string;
+  tefapCert: string;
+  clusterID?: string;
+  physicalAilments: {
+    diabetes: boolean;
+    hypertension: boolean;
+    heartDisease: boolean;
+    kidneyDisease: boolean;
+    cancer: boolean;
+    otherText: string;
+    other: boolean;
+  };
+  physicalDisability: {
+    otherText: string;
+    other: boolean;
+  };
+  mentalHealthConditions: {
+    otherText: string;
+    other: boolean;
+  };
+  activeStatus?: boolean;
+}
+
+export interface DietaryRestrictions {
+  lowSugar: boolean;
+  kidneyFriendly: boolean;
+  vegan: boolean;
+  vegetarian: boolean;
+  halal: boolean;
+  microwaveOnly: boolean;
+  softFood: boolean;
+  lowSodium: boolean;
+  noCookingEquipment: boolean;
+  heartFriendly: boolean;
+  foodAllergens: string[];
+  otherText: string;
+  other: boolean;
+  dietaryPreferences?: string;
+  [key: string]: any;
+  activeStatus?: boolean;
+}
+
+export interface DeliveryDetails {
+  deliveryInstructions: string;
+  dietaryRestrictions: DietaryRestrictions;
+}
+```
+
+## Usage Examples
+
+### Creating a New Client Profile
+
+```typescript
+import { ClientProfile, DietaryRestrictions } from '@/types/client-types';
+
+const newClient: ClientProfile = {
+  uid: 'client-123',
+  firstName: 'Jane',
+  lastName: 'Doe',
+  email: 'jane.doe@example.com',
+  phone: '202-555-0123',
+  alternativePhone: '202-555-0124',
+  address: '1234 Main St',
+  address2: 'Apt 5B',
+  city: 'Washington',
+  state: 'DC',
+  zipCode: '20001',
+  quadrant: 'NW',
+  ward: '1',
+  coordinates: [38.9072, -77.0369],
+  dob: '1950-01-15',
+  gender: 'Female',
+  ethnicity: 'Hispanic/Latino',
+  language: 'English',
+  adults: 1,
+  children: 0,
+  seniors: 1,
+  total: 1,
+  headOfHousehold: 'Senior',
+  deliveryFreq: 'Weekly',
+  deliveryDetails: {
+    deliveryInstructions: 'Ring doorbell twice',
+    dietaryRestrictions: {
+      lowSugar: true,
+      kidneyFriendly: false,
+      vegan: false,
+      vegetarian: false,
+      halal: false,
+      microwaveOnly: true,
+      softFood: true,
+      lowSodium: true,
+      noCookingEquipment: false,
+      heartFriendly: true,
+      foodAllergens: ['peanuts', 'shellfish'],
+      other: false,
+      otherText: ''
+    }
+  },
+  lifeChallenges: 'Limited mobility',
+  lifestyleGoals: 'Improve blood sugar control',
+  notes: 'Prefers morning deliveries',
+  tags: ['senior', 'diabetic'],
+  startDate: '2024-01-01',
+  endDate: '2024-12-31',
+  recurrence: 'Weekly',
+  tefapCert: 'TEFAP-2024-001',
+  physicalAilments: {
+    diabetes: true,
+    hypertension: true,
+    heartDisease: false,
+    kidneyDisease: false,
+    cancer: false,
+    other: false,
+    otherText: ''
+  },
+  physicalDisability: {
+    other: false,
+    otherText: ''
+  },
+  mentalHealthConditions: {
+    other: false,
+    otherText: ''
+  },
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  activeStatus: true
+};
+```
+
+### Checking Dietary Restrictions
+
+```typescript
+import { DietaryRestrictions } from '@/types/client-types';
+
+function hasDietaryRestrictions(restrictions: DietaryRestrictions): boolean {
+  return restrictions.lowSugar ||
+         restrictions.kidneyFriendly ||
+         restrictions.vegan ||
+         restrictions.vegetarian ||
+         restrictions.halal ||
+         restrictions.lowSodium ||
+         restrictions.heartFriendly ||
+         restrictions.foodAllergens.length > 0 ||
+         restrictions.other;
+}
+
+function getDietaryRestrictionsText(restrictions: DietaryRestrictions): string[] {
+  const tags: string[] = [];
+  
+  if (restrictions.lowSugar) tags.push('Low Sugar');
+  if (restrictions.kidneyFriendly) tags.push('Kidney Friendly');
+  if (restrictions.vegan) tags.push('Vegan');
+  if (restrictions.vegetarian) tags.push('Vegetarian');
+  if (restrictions.halal) tags.push('Halal');
+  if (restrictions.lowSodium) tags.push('Low Sodium');
+  if (restrictions.heartFriendly) tags.push('Heart Friendly');
+  
+  restrictions.foodAllergens.forEach(allergen => {
+    tags.push(`No ${allergen}`);
+  });
+  
+  if (restrictions.other && restrictions.otherText) {
+    tags.push(restrictions.otherText);
+  }
+  
+  return tags;
+}
+```
+
+### Updating Client Notes with Timestamp
+
+```typescript
+import { ClientProfile } from '@/types/client-types';
+
+function updateClientNotes(client: ClientProfile, newNotes: string): ClientProfile {
+  return {
+    ...client,
+    notes: newNotes,
+    notesTimestamp: {
+      notes: newNotes,
+      timestamp: new Date()
+    },
+    updatedAt: new Date()
+  };
+}
+```

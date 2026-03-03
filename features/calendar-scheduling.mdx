@@ -1,0 +1,284 @@
+---
+title: Calendar & Scheduling
+description: How to schedule deliveries using the interactive calendar in Food For All DC
+---
+
+The Calendar is the central hub for scheduling and managing food deliveries. It provides both monthly and daily views to help you plan and track deliveries efficiently.
+
+## Accessing the Calendar
+
+Navigate to the **Calendar** page from the main navigation menu. The calendar displays all scheduled deliveries and allows you to add new ones.
+
+## Calendar Views
+
+### Monthly View
+
+The monthly view shows all deliveries for the entire month at a glance.
+
+**Features:**
+- See delivery counts for each day
+- Color-coded indicators for daily capacity limits
+- Click any date to switch to daily view for that date
+- Navigate between months using arrow buttons
+
+<Info>
+  Delivery counts are shown on each day. Days exceeding the daily limit are highlighted to help with capacity planning.
+</Info>
+
+### Daily View
+
+The daily view shows detailed information for all deliveries scheduled on a specific date.
+
+**Features:**
+- List of all clients scheduled for delivery
+- Assigned drivers for each delivery
+- Delivery clusters/routes
+- Client details including dietary restrictions and delivery instructions
+- Daily capacity limit indicator
+
+## Adding a New Delivery
+
+<Steps>
+  <Step title="Click Add Delivery">
+    Click the **+ Add Delivery** button in the calendar header.
+  </Step>
+  
+  <Step title="Select Client">
+    Search for and select the client from the dropdown list. The search includes:
+    - Client first and last name
+    - Address
+    - Phone number
+  </Step>
+  
+  <Step title="Choose Delivery Date">
+    Select the delivery date from the date picker. The current calendar date is pre-selected.
+  </Step>
+  
+  <Step title="Set Recurrence Pattern">
+    Choose how often this delivery should repeat:
+    - **None** - One-time delivery
+    - **Weekly** - Repeats every week on the same day
+    - **2x-Monthly** - Repeats twice per month
+    - **Monthly** - Repeats once per month
+    - **Custom** - Select specific dates manually
+  </Step>
+  
+  <Step title="Configure Recurring Deliveries">
+    If you selected a recurring pattern (except Custom):
+    
+    Choose when the recurrence should end:
+    - **On a specific date** - Select the end date
+    - **After a number of occurrences** - Enter the number of deliveries
+    
+    The system will automatically skip dates that already have a delivery scheduled for this client.
+  </Step>
+  
+  <Step title="Select Custom Dates (Optional)">
+    If you selected **Custom** recurrence:
+    
+    Manually select each date when the delivery should occur. This is useful for irregular schedules.
+  </Step>
+  
+  <Step title="Review and Save">
+    Review the delivery details and click **Add** to create the delivery(s).
+  </Step>
+</Steps>
+
+<Note>
+  The system prevents duplicate deliveries - you cannot schedule the same client twice on the same date.
+</Note>
+
+## Recurrence Patterns Explained
+
+### Weekly Recurrence
+
+Delivers every week on the same day of the week. For example:
+- Start date: Monday, March 10, 2025
+- Creates deliveries for: March 10, March 17, March 24, March 31, etc.
+
+### 2x-Monthly Recurrence
+
+Delivers twice per month, typically on the 1st and 3rd occurrence of the selected weekday. For example:
+- Start date: Tuesday, March 4, 2025 (1st Tuesday)
+- Creates deliveries for: March 4, March 18, April 1, April 15, etc.
+
+### Monthly Recurrence
+
+Delivers once per month on the same day of the month. For example:
+- Start date: March 15, 2025
+- Creates deliveries for: March 15, April 15, May 15, etc.
+
+### Custom Dates
+
+Allows you to pick any specific dates, regardless of pattern. Useful for:
+- Irregular schedules
+- Holiday adjustments
+- One-off special circumstances
+
+## Managing Existing Deliveries
+
+### Viewing Delivery Details
+
+In Daily View, each delivery shows:
+- Client name (click to view full profile)
+- Assigned driver
+- Delivery time
+- Cluster ID (route number)
+- Dietary restrictions
+- Delivery instructions
+- Tags
+
+### Editing a Delivery
+
+<Steps>
+  <Step title="Navigate to Day View">
+    Switch to Daily View for the date containing the delivery you want to edit.
+  </Step>
+  
+  <Step title="Click on Delivery">
+    Click on the delivery entry to open the details.
+  </Step>
+  
+  <Step title="Make Changes">
+    Update the driver assignment, time, or other details as needed.
+  </Step>
+  
+  <Step title="Save Changes">
+    Click **Save** to update the delivery.
+  </Step>
+</Steps>
+
+### Deleting a Delivery
+
+You can delete individual deliveries or entire recurring series:
+
+<Steps>
+  <Step title="Select Delivery">
+    In Daily View, find the delivery to delete.
+  </Step>
+  
+  <Step title="Open Options Menu">
+    Click the menu icon or right-click on the delivery.
+  </Step>
+  
+  <Step title="Choose Delete Option">
+    Select either:
+    - **Delete this delivery** - Removes only this single occurrence
+    - **Delete all in series** - Removes all recurring deliveries in the series
+  </Step>
+  
+  <Step title="Confirm Deletion">
+    Confirm to remove the delivery(s).
+  </Step>
+</Steps>
+
+## Daily Limits and Capacity Planning
+
+### Setting Daily Limits
+
+In Monthly View, you can set capacity limits for each day of the week:
+
+<Steps>
+  <Step title="Click Edit Limits">
+    In Monthly View, click the **Edit Limits** button (gear icon).
+  </Step>
+  
+  <Step title="Set Limits by Day">
+    Enter the maximum number of deliveries for each day of the week:
+    - Sunday
+    - Monday
+    - Tuesday
+    - Wednesday
+    - Thursday
+    - Friday
+    - Saturday
+  </Step>
+  
+  <Step title="Save Limits">
+    Click **Save** to apply the new limits.
+  </Step>
+</Steps>
+
+### Understanding Limit Indicators
+
+The calendar uses visual indicators to show capacity status:
+- **Green** - Below capacity (plenty of room)
+- **Yellow** - Approaching capacity (75-99% of limit)
+- **Red** - At or over capacity (100%+ of limit)
+
+<Warning>
+  The system does not prevent scheduling over the limit - it only provides visual warnings. You can override limits when necessary.
+</Warning>
+
+## Calendar Navigation
+
+### Quick Navigation
+
+- **Today Button** - Jump to today's date in either view
+- **Previous/Next Arrows** - Move backward/forward by day (Daily View) or month (Monthly View)
+- **View Toggle** - Switch between Monthly and Daily views
+- **Date Picker** - Click the date display to jump to any specific date
+
+### URL-Based Navigation
+
+The calendar supports URL parameters for easy sharing:
+
+```
+/calendar?date=2025-03-15
+```
+
+This allows you to share specific dates with team members via links.
+
+## Searching Deliveries
+
+In Daily View, use the search functionality to find specific deliveries:
+
+- Search by client name
+- Filter by driver
+- Filter by cluster/route
+- Search by dietary restrictions
+- Search by tags
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Plan Ahead" icon="calendar">
+    Schedule recurring deliveries in advance to ensure consistent service and better route optimization.
+  </Card>
+  
+  <Card title="Monitor Capacity" icon="gauge">
+    Keep an eye on daily limits to ensure you have sufficient resources (drivers, food) for each day.
+  </Card>
+  
+  <Card title="Use Recurrence Wisely" icon="repeat">
+    Set up recurring deliveries for regular clients to save time and reduce manual scheduling.
+  </Card>
+  
+  <Card title="Review Weekly" icon="list-check">
+    Review the upcoming week's deliveries every Monday to catch any issues early.
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<Accordion title="Why can't I add a delivery for this client on this date?">
+  The client likely already has a delivery scheduled for that date. The system prevents duplicate deliveries. Check the daily view to confirm.
+</Accordion>
+
+<Accordion title="Why don't I see the delivery I just created?">
+  Make sure you're viewing the correct date. If you created a recurring delivery, navigate to each occurrence date to see individual deliveries.
+</Accordion>
+
+<Accordion title="How do I change a recurring delivery pattern?">
+  You cannot edit the recurrence pattern directly. Instead, delete the series and create a new recurring delivery with the desired pattern.
+</Accordion>
+
+<Accordion title="What happens to deliveries when I delete a client?">
+  All scheduled deliveries for that client are automatically removed from the calendar.
+</Accordion>
+
+## Related Features
+
+- [Client Management](/features/client-management) - Manage client profiles for scheduling
+- [Route Optimization](/features/route-optimization) - Optimize delivery routes from scheduled deliveries
+- [Reporting](/features/reporting) - Generate delivery reports and analytics

@@ -1,0 +1,349 @@
+---
+title: Route Optimization
+description: How route optimization and clustering works in Food For All DC
+---
+
+The Route Optimization system automatically groups deliveries into efficient routes based on geographic proximity and capacity constraints. This helps drivers complete deliveries faster and reduces travel time.
+
+## Accessing Routes
+
+Navigate to the **Routes** page from the main navigation menu. This page shows all deliveries for a selected date and allows you to create and manage delivery routes (clusters).
+
+## Understanding Clusters
+
+A **cluster** (or route) is a group of deliveries that are geographically close to each other. Each cluster can be:
+- Assigned to a specific driver
+- Scheduled for a specific time window
+- Visualized on a map
+- Exported for driver routing apps
+
+<Info>
+  The system uses client addresses and geocoding to determine which deliveries should be grouped together.
+</Info>
+
+## Generating Optimized Routes
+
+<Steps>
+  <Step title="Select Date">
+    Use the date picker to select the delivery date you want to optimize.
+  </Step>
+  
+  <Step title="Review Deliveries">
+    The spreadsheet shows all clients scheduled for delivery on that date, including:
+    - Client name
+    - Address and ward
+    - Dietary restrictions
+    - Delivery instructions
+    - Current cluster assignment (if any)
+  </Step>
+  
+  <Step title="Click Generate Clusters">
+    Click the **Generate Clusters** button (with group work icon).
+  </Step>
+  
+  <Step title="Configure Clustering">
+    Set your clustering parameters:
+    
+    - **Number of Routes** - How many delivery routes to create (typically matches your number of available drivers)
+    - **Minimum Deliveries per Route** - The fewest deliveries allowed in a single route
+    - **Maximum Deliveries per Route** - The most deliveries allowed in a single route
+  </Step>
+  
+  <Step title="Generate Routes">
+    Click **Generate** to create optimized clusters.
+    
+    The system will:
+    - Geocode any addresses missing coordinates
+    - Group deliveries based on geographic proximity
+    - Balance deliveries across routes based on your min/max constraints
+    - Assign cluster IDs (1, 2, 3, etc.)
+  </Step>
+  
+  <Step title="Review Results">
+    The spreadsheet updates to show cluster assignments. Each delivery now has a cluster ID with a color-coded indicator.
+  </Step>
+</Steps>
+
+<Note>
+  The clustering algorithm prioritizes geographic proximity while respecting your minimum and maximum delivery constraints. Routes are balanced as evenly as possible.
+</Note>
+
+## Clustering Validation
+
+The system validates your clustering parameters before generating routes:
+
+### Insufficient Deliveries
+
+If you request more routes than can be created:
+
+```
+Example:
+- 10 deliveries scheduled
+- Request 5 routes with minimum 3 deliveries each
+- Required: 5 × 3 = 15 deliveries minimum
+- Error: Not enough deliveries
+```
+
+**Solution:** Use fewer routes or lower the minimum deliveries per route.
+
+### Exceeds Maximum Capacity
+
+If your max deliveries per route is too low:
+
+```
+Example:
+- 30 deliveries scheduled
+- Request 3 routes with maximum 8 deliveries each
+- Capacity: 3 × 8 = 24 deliveries maximum
+- Error: 6 deliveries left unassigned
+```
+
+**Solution:** Use more routes or increase the maximum deliveries per route.
+
+### Too Many Routes
+
+If you request more routes than recommended:
+
+```
+Example:
+- 10 deliveries scheduled
+- Request 8 routes
+- Result: Many routes with only 1-2 deliveries (inefficient)
+```
+
+**Solution:** The system suggests the optimal number of routes for efficiency.
+
+## Manual Cluster Management
+
+### Assigning Deliveries to Clusters
+
+You can manually move deliveries between clusters:
+
+<Steps>
+  <Step title="Find the Delivery">
+    Locate the client row in the Routes spreadsheet.
+  </Step>
+  
+  <Step title="Click Cluster Dropdown">
+    Click on the Cluster ID cell for that delivery.
+  </Step>
+  
+  <Step title="Select New Cluster">
+    Choose a different cluster ID from the dropdown, or select **Add Cluster** to create a new route.
+  </Step>
+  
+  <Step title="Confirm Change">
+    The delivery is immediately reassigned to the new cluster.
+  </Step>
+</Steps>
+
+### Adding a New Cluster
+
+To create an additional cluster manually:
+
+1. Click the Cluster ID dropdown on any delivery
+2. Select **Add Cluster** (the + option)
+3. Enter the number of new clusters to create
+4. The new clusters are created with sequential IDs
+
+### Resetting All Clusters
+
+To clear all cluster assignments for a date:
+
+<Warning>
+  Resetting clusters removes all route assignments and driver/time assignments. This action cannot be undone.
+</Warning>
+
+<Steps>
+  <Step title="Click Reset Button">
+    Click the **Reset** button (circular arrow icon) in the toolbar.
+  </Step>
+  
+  <Step title="Confirm Reset">
+    Confirm that you want to clear all cluster data for this date.
+  </Step>
+  
+  <Step title="Clusters Cleared">
+    All deliveries are now unassigned and ready for re-clustering.
+  </Step>
+</Steps>
+
+## Assigning Drivers and Times
+
+### Assigning Drivers to Routes
+
+<Steps>
+  <Step title="Select Deliveries or Clusters">
+    Check the boxes next to deliveries to select them. If all deliveries in a cluster are selected, the entire cluster is selected.
+  </Step>
+  
+  <Step title="Click Assign Driver">
+    Click the **Assign Driver** button (person icon) in the toolbar.
+  </Step>
+  
+  <Step title="Choose Driver">
+    Select a driver from the list. The list includes:
+    - Driver name
+    - Contact information
+    - Any other relevant driver details
+  </Step>
+  
+  <Step title="Confirm Assignment">
+    The selected deliveries/clusters are assigned to the driver and the spreadsheet updates.
+  </Step>
+</Steps>
+
+### Assigning Delivery Times
+
+<Steps>
+  <Step title="Select Deliveries">
+    Check the boxes next to the deliveries you want to schedule.
+  </Step>
+  
+  <Step title="Click Assign Time">
+    Click the **Assign Time** button (clock icon) in the toolbar.
+  </Step>
+  
+  <Step title="Select Time Slot">
+    Choose from predefined time slots:
+    - Morning (9:00 AM - 12:00 PM)
+    - Afternoon (12:00 PM - 3:00 PM)
+    - Evening (3:00 PM - 6:00 PM)
+    - Or select a custom time
+  </Step>
+  
+  <Step title="Confirm Time">
+    The selected deliveries are assigned the time slot.
+  </Step>
+</Steps>
+
+<Info>
+  You can assign times to individual deliveries or to entire clusters. When you assign a time to one delivery in a cluster, it's automatically applied to all deliveries in that cluster.
+</Info>
+
+## Viewing Routes on the Map
+
+The Routes page includes an interactive map that visualizes all delivery locations:
+
+### Map Features
+
+- **Color-coded markers** - Each cluster has a unique color
+- **Client information popup** - Click any marker to see:
+  - Client name
+  - Address
+  - Dietary restrictions
+  - Delivery instructions
+  - Current cluster assignment
+  - Assigned driver and time
+- **Cluster boundaries** - Visual grouping of deliveries in the same cluster
+- **Search and filter** - Find specific clients on the map
+
+### Editing from the Map
+
+You can make changes directly from the map popup:
+
+<Steps>
+  <Step title="Click a Marker">
+    Click any delivery marker on the map to open the popup.
+  </Step>
+  
+  <Step title="Edit Assignments">
+    Use the popup controls to:
+    - Change cluster assignment
+    - Assign/change driver
+    - Set/update delivery time
+  </Step>
+  
+  <Step title="Save Changes">
+    Changes are saved automatically and reflected in both the map and spreadsheet.
+  </Step>
+</Steps>
+
+## Exporting Routes
+
+Once routes are optimized and assigned, you can export them for drivers:
+
+<Steps>
+  <Step title="Click Export Button">
+    Click the **Export** button (download icon) in the toolbar.
+  </Step>
+  
+  <Step title="Choose Export Format">
+    Select your export format:
+    - **Routes** - Standard route export with all delivery details
+    - **Doordash** - Formatted for DoorDash Drive integration
+  </Step>
+  
+  <Step title="Select Delivery Method">
+    Choose how to deliver the export:
+    - **Download** - Download CSV files immediately
+    - **Email** - Send route sheets to drivers via email (if configured)
+  </Step>
+  
+  <Step title="Receive Export">
+    The system generates separate files for each route/driver containing:
+    - Client names and addresses
+    - Delivery instructions
+    - Dietary restrictions
+    - Contact information
+    - Turn-by-turn directions (if using Doordash export)
+  </Step>
+</Steps>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Balance Route Sizes" icon="scale-balanced">
+    Try to keep routes roughly equal in size. Avoid creating routes with drastically different numbers of deliveries.
+  </Card>
+  
+  <Card title="Consider Geography" icon="map">
+    Review the map view to ensure clusters make geographic sense. Sometimes manual adjustments improve efficiency.
+  </Card>
+  
+  <Card title="Account for Special Needs" icon="heart">
+    Pay attention to clients with special dietary needs or complex delivery instructions when assigning drivers.
+  </Card>
+  
+  <Card title="Save Route Templates" icon="floppy-disk">
+    For recurring delivery patterns, save successful route configurations as templates for future use.
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<Accordion title="Why won't the system generate clusters?">
+  Common issues:
+  - No deliveries scheduled for the selected date
+  - Missing or invalid addresses (check for geocoding errors)
+  - Clustering parameters are impossible to satisfy (adjust min/max deliveries)
+  - Network connectivity issues preventing geocoding
+</Accordion>
+
+<Accordion title="Why are some deliveries in different clusters than expected?">
+  The clustering algorithm prioritizes geographic proximity, but also considers:
+  - The min/max delivery constraints you set
+  - Balancing delivery counts across routes
+  - Address geocoding accuracy
+  
+  You can always manually reassign deliveries to different clusters.
+</Accordion>
+
+<Accordion title="Can I create routes without generating clusters?">
+  Yes. You can manually assign deliveries to clusters using the Cluster ID dropdown. Create new clusters as needed and assign deliveries individually.
+</Accordion>
+
+<Accordion title="What if a client's address can't be geocoded?">
+  The system will alert you to geocoding failures. You should:
+  1. Verify the address is complete and correct
+  2. Update the client profile with the corrected address
+  3. Try generating clusters again
+  
+  Deliveries without valid coordinates cannot be included in optimized routes.
+</Accordion>
+
+## Related Features
+
+- [Calendar & Scheduling](/features/calendar-scheduling) - Schedule deliveries before optimizing routes
+- [Client Management](/features/client-management) - Ensure client addresses are accurate
+- [Reporting](/features/reporting) - Generate reports on delivery efficiency and metrics

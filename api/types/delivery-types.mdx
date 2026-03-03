@@ -1,0 +1,328 @@
+---
+title: "Delivery Types"
+description: "TypeScript interfaces for deliveries, routes, and volunteers"
+---
+
+## Overview
+
+Delivery types define the structure for managing food deliveries, volunteer routes, and delivery scheduling in the Food For All DC system.
+
+## Delivery
+
+The main interface representing a scheduled food delivery.
+
+<ResponseField name="id" type="string" required>
+  Unique identifier for the delivery
+</ResponseField>
+
+<ResponseField name="assignedDriverId" type="string" required>
+  ID of the volunteer driver assigned to this delivery
+</ResponseField>
+
+<ResponseField name="assignedDriverName" type="string" required>
+  Name of the assigned volunteer driver
+</ResponseField>
+
+<ResponseField name="clientId" type="string" required>
+  ID of the client receiving the delivery
+</ResponseField>
+
+<ResponseField name="clientName" type="string" required>
+  Name of the client receiving the delivery
+</ResponseField>
+
+<ResponseField name="deliveryDate" type="string | Date | Timestamp" required>
+  Date of the delivery. Can be a string, JavaScript Date object, or Firebase Timestamp
+</ResponseField>
+
+<ResponseField name="time" type="string" required>
+  Time of the delivery (e.g., "10:00 AM")
+</ResponseField>
+
+<ResponseField name="cluster" type="number" required>
+  Delivery cluster number for route optimization
+</ResponseField>
+
+<ResponseField name="recurrence" type="'None' | 'Weekly' | '2x-Monthly' | 'Monthly' | 'Custom'" required>
+  Recurrence pattern for the delivery
+</ResponseField>
+
+<ResponseField name="repeatsEndDate" type="string">
+  Optional end date for recurring deliveries (ISO date string)
+</ResponseField>
+
+## Volunteer
+
+Interface representing a volunteer driver.
+
+<ResponseField name="id" type="string" required>
+  Unique identifier for the volunteer
+</ResponseField>
+
+<ResponseField name="name" type="string" required>
+  Volunteer's full name
+</ResponseField>
+
+<ResponseField name="phone" type="string" required>
+  Volunteer's phone number
+</ResponseField>
+
+## Route
+
+Interface representing a delivery route assigned to a volunteer.
+
+<ResponseField name="volunteer" type="Volunteer" required>
+  The volunteer assigned to this route
+</ResponseField>
+
+<ResponseField name="deliveries" type="Delivery[]" required>
+  Array of deliveries assigned to this route
+</ResponseField>
+
+## Type Definitions
+
+```typescript
+import { Timestamp } from "firebase/firestore";
+
+export interface Delivery {
+  id: string;
+  assignedDriverId: string;
+  assignedDriverName: string;
+  clientId: string;
+  clientName: string;
+  deliveryDate: string | Date | Timestamp;
+  time: string;
+  cluster: number;
+  recurrence: "None" | "Weekly" | "2x-Monthly" | "Monthly" | "Custom";
+  repeatsEndDate?: string;
+}
+
+export interface Volunteer {
+  id: string;
+  name: string;
+  phone: string;
+}
+
+export interface Route {
+  volunteer: Volunteer;
+  deliveries: Delivery[];
+}
+```
+
+## Recurrence Options
+
+The `recurrence` field supports the following values:
+
+- **None** - One-time delivery, no recurrence
+- **Weekly** - Repeats every week on the same day
+- **2x-Monthly** - Repeats twice per month
+- **Monthly** - Repeats once per month on the same date
+- **Custom** - Custom recurrence pattern defined by specific dates
+
+## Usage Examples
+
+### Creating a One-Time Delivery
+
+```typescript
+import { Delivery } from '@/types/delivery-types';
+
+const delivery: Delivery = {
+  id: 'delivery-123',
+  assignedDriverId: 'driver-456',
+  assignedDriverName: 'John Smith',
+  clientId: 'client-789',
+  clientName: 'Jane Doe',
+  deliveryDate: '2024-03-15',
+  time: '10:00 AM',
+  cluster: 1,
+  recurrence: 'None'
+};
+```
+
+### Creating a Recurring Weekly Delivery
+
+```typescript
+import { Delivery } from '@/types/delivery-types';
+
+const weeklyDelivery: Delivery = {
+  id: 'delivery-456',
+  assignedDriverId: 'driver-123',
+  assignedDriverName: 'Sarah Johnson',
+  clientId: 'client-321',
+  clientName: 'Bob Williams',
+  deliveryDate: '2024-03-01',
+  time: '2:00 PM',
+  cluster: 2,
+  recurrence: 'Weekly',
+  repeatsEndDate: '2024-12-31' // Ends on Dec 31, 2024
+};
+```
+
+### Building a Delivery Route
+
+```typescript
+import { Route, Volunteer, Delivery } from '@/types/delivery-types';
+
+const volunteer: Volunteer = {
+  id: 'vol-001',
+  name: 'Maria Garcia',
+  phone: '202-555-0100'
+};
+
+const deliveries: Delivery[] = [
+  {
+    id: 'del-001',
+    assignedDriverId: volunteer.id,
+    assignedDriverName: volunteer.name,
+    clientId: 'client-001',
+    clientName: 'Alice Brown',
+    deliveryDate: '2024-03-15',
+    time: '9:00 AM',
+    cluster: 1,
+    recurrence: 'Weekly'
+  },
+  {
+    id: 'del-002',
+    assignedDriverId: volunteer.id,
+    assignedDriverName: volunteer.name,
+    clientId: 'client-002',
+    clientName: 'Charlie Davis',
+    deliveryDate: '2024-03-15',
+    time: '9:30 AM',
+    cluster: 1,
+    recurrence: 'Weekly'
+  },
+  {
+    id: 'del-003',
+    assignedDriverId: volunteer.id,
+    assignedDriverName: volunteer.name,
+    clientId: 'client-003',
+    clientName: 'Diana Evans',
+    deliveryDate: '2024-03-15',
+    time: '10:00 AM',
+    cluster: 1,
+    recurrence: 'Weekly'
+  }
+];
+
+const route: Route = {
+  volunteer,
+  deliveries
+};
+
+console.log(`Route for ${route.volunteer.name}: ${route.deliveries.length} deliveries`);
+```
+
+### Filtering Deliveries by Date
+
+```typescript
+import { Delivery } from '@/types/delivery-types';
+import { Timestamp } from 'firebase/firestore';
+
+function getDeliveriesForDate(deliveries: Delivery[], targetDate: string): Delivery[] {
+  return deliveries.filter(delivery => {
+    // Handle different date types
+    let deliveryDateStr: string;
+    
+    if (typeof delivery.deliveryDate === 'string') {
+      deliveryDateStr = delivery.deliveryDate;
+    } else if (delivery.deliveryDate instanceof Date) {
+      deliveryDateStr = delivery.deliveryDate.toISOString().split('T')[0];
+    } else {
+      // Firebase Timestamp
+      deliveryDateStr = (delivery.deliveryDate as Timestamp)
+        .toDate()
+        .toISOString()
+        .split('T')[0];
+    }
+    
+    return deliveryDateStr === targetDate;
+  });
+}
+
+// Usage
+const todaysDeliveries = getDeliveriesForDate(allDeliveries, '2024-03-15');
+```
+
+### Grouping Deliveries by Cluster
+
+```typescript
+import { Delivery } from '@/types/delivery-types';
+
+function groupDeliveriesByCluster(deliveries: Delivery[]): Map<number, Delivery[]> {
+  const clusters = new Map<number, Delivery[]>();
+  
+  deliveries.forEach(delivery => {
+    const clusterDeliveries = clusters.get(delivery.cluster) || [];
+    clusterDeliveries.push(delivery);
+    clusters.set(delivery.cluster, clusterDeliveries);
+  });
+  
+  return clusters;
+}
+
+// Usage
+const clusteredDeliveries = groupDeliveriesByCluster(allDeliveries);
+clusteredDeliveries.forEach((deliveries, cluster) => {
+  console.log(`Cluster ${cluster}: ${deliveries.length} deliveries`);
+});
+```
+
+### Calculating Route Statistics
+
+```typescript
+import { Route } from '@/types/delivery-types';
+
+interface RouteStats {
+  volunteerName: string;
+  totalDeliveries: number;
+  clusters: number[];
+  uniqueClients: number;
+}
+
+function calculateRouteStats(route: Route): RouteStats {
+  const uniqueClusters = new Set(route.deliveries.map(d => d.cluster));
+  const uniqueClients = new Set(route.deliveries.map(d => d.clientId));
+  
+  return {
+    volunteerName: route.volunteer.name,
+    totalDeliveries: route.deliveries.length,
+    clusters: Array.from(uniqueClusters).sort((a, b) => a - b),
+    uniqueClients: uniqueClients.size
+  };
+}
+
+// Usage
+const stats = calculateRouteStats(route);
+console.log(`${stats.volunteerName} has ${stats.totalDeliveries} deliveries`);
+console.log(`Covering clusters: ${stats.clusters.join(', ')}`);
+console.log(`Serving ${stats.uniqueClients} unique clients`);
+```
+
+### Checking for Recurring Deliveries
+
+```typescript
+import { Delivery } from '@/types/delivery-types';
+
+function isRecurringDelivery(delivery: Delivery): boolean {
+  return delivery.recurrence !== 'None';
+}
+
+function getRecurrenceDescription(delivery: Delivery): string {
+  if (!isRecurringDelivery(delivery)) {
+    return 'One-time delivery';
+  }
+  
+  const baseDescription = `${delivery.recurrence} delivery`;
+  
+  if (delivery.repeatsEndDate) {
+    return `${baseDescription} until ${delivery.repeatsEndDate}`;
+  }
+  
+  return `${baseDescription} (ongoing)`;
+}
+
+// Usage
+const description = getRecurrenceDescription(delivery);
+console.log(description); // "Weekly delivery until 2024-12-31"
+```

@@ -1,0 +1,583 @@
+---
+title: Project Structure
+description: Code organization and folder structure for Food For All DC
+---
+
+## Repository Overview
+
+```
+food-for-all-dc/
+├── my-app/                 # Main React application
+│   ├── src/                # Source code
+│   ├── public/             # Static assets
+│   ├── functions-python/   # Python Cloud Functions
+│   ├── package.json        # Dependencies
+│   ├── tsconfig.json       # TypeScript config
+│   └── firebase.json       # Firebase config
+├── clean-code archive/     # Documentation archive
+├── README.md               # Project overview
+├── CONTRIBUTING.md         # Contributing guide
+└── LICENSE                 # Apache 2.0 license
+```
+
+## Source Directory Structure
+
+The `my-app/src/` directory contains all application source code:
+
+```
+src/
+├── auth/              # Authentication & protected routes
+├── components/        # UI components
+│   └── common/        # Reusable components (Button, Input, Modal)
+├── pages/             # App pages (Calendar, Profile, Reports, etc.)
+├── services/          # Business logic & API services
+├── context/           # React context providers
+├── hooks/             # Custom React hooks
+├── config/            # Configuration files
+├── styles/            # CSS variables & global styles
+├── types/             # TypeScript definitions
+├── utils/             # Utility functions
+├── assets/            # Images and static files
+├── App.tsx            # Root component
+├── index.tsx          # Entry point
+└── routesConfig.tsx   # Route definitions
+```
+
+## Directory Details
+
+### `/auth` - Authentication
+
+**Purpose:** Authentication logic and route protection
+
+```
+auth/
+├── AuthProvider.tsx       # Auth context provider
+├── ProtectedRoute.tsx     # Role-based route protection
+└── firebaseConfig.ts      # Firebase initialization
+```
+
+**Key Files:**
+
+**AuthProvider.tsx** - Manages user authentication state and role
+
+```typescript
+import { useAuth } from '../auth/AuthProvider';
+
+const { user, userRole, loading } = useAuth();
+```
+
+**ProtectedRoute.tsx** - Wraps routes requiring authentication
+
+```typescript
+// Example usage in routesConfig.tsx
+<Route element={<ProtectedRoute allowedRoles={[UserType.Admin]} />}>
+  <Route path="/admin" element={<AdminPage />} />
+</Route>
+```
+
+### `/components` - UI Components
+
+**Purpose:** Reusable UI components organized by feature
+
+```
+components/
+├── common/                    # Shared components
+│   ├── Button/
+│   │   ├── Button.tsx
+│   │   └── Button.module.css
+│   ├── Input/
+│   │   ├── Input.tsx
+│   │   └── Input.module.css
+│   └── Modal/
+│       ├── Modal.tsx
+│       └── Modal.module.css
+├── Spreadsheet/               # Client data grid
+├── UsersSpreadsheet/          # User management grid
+├── DietaryRestrictionsLegend/ # Dietary info component
+├── LoadingIndicator/          # Loading spinner
+├── PageDatePicker/            # Date picker component
+├── performance/               # Performance monitoring components
+└── skeletons/                 # Loading skeleton screens
+```
+
+**Common Components:**
+
+Always use these instead of creating custom variants:
+
+```typescript
+import { Button, Input, Modal } from '../components/common';
+
+// Button - Consistent button styling
+<Button variant="primary" size="small" fullWidth>
+  Save
+</Button>
+
+// Input - Form input with label and error handling
+<Input 
+  label="Name" 
+  value={name} 
+  onChange={setName} 
+  error={error} 
+/>
+
+// Modal - Consistent modal dialogs
+<Modal 
+  open={isOpen} 
+  onClose={handleClose} 
+  title="Confirm Action"
+  actions={...}
+>
+  Modal content
+</Modal>
+```
+
+<Info>
+Before creating a new component, check if a similar one exists in `/common`. Reuse over recreation!
+</Info>
+
+### `/pages` - Application Pages
+
+**Purpose:** Top-level route components
+
+```
+pages/
+├── Base/              # App shell and navigation
+│   ├── Base.tsx
+│   └── NavBar/
+├── Calendar/          # Delivery scheduling calendar
+│   ├── Calendar.tsx
+│   └── components/
+├── Delivery/          # Route planning and optimization
+│   ├── Delivery.tsx
+│   ├── components/
+│   ├── types/
+│   └── utils/
+├── Profile/           # Client profile management
+│   ├── Profile.tsx
+│   ├── Tags/
+│   └── components/
+├── Reports/           # Reporting and analytics
+│   └── Reports.tsx
+└── Login/             # Authentication pages
+    └── Login.tsx
+```
+
+**Page Structure:**
+
+Each page follows this pattern:
+
+```typescript
+// Example: Calendar.tsx
+import React from 'react';
+import { useAuth } from '../../auth/AuthProvider';
+import { useClientData } from '../../context/ClientDataContext';
+import styles from './Calendar.module.css';
+
+const Calendar: React.FC = () => {
+  const { userRole } = useAuth();
+  const { clients } = useClientData();
+
+  return (
+    <div className={styles.container}>
+      {/* Page content */}
+    </div>
+  );
+};
+
+export default Calendar;
+```
+
+### `/services` - Business Logic
+
+**Purpose:** Firebase operations and business logic
+
+```
+services/
+├── client-service.ts      # Client CRUD operations
+├── delivery-service.ts    # Delivery event management
+├── driver-service.ts      # Driver management
+├── AuthUserService.ts     # User authentication
+├── firebase-storage.ts    # File uploads/downloads
+├── performance-monitor.ts # Performance tracking
+├── index.ts               # Service exports
+└── README.md              # Service documentation
+```
+
+**Service Pattern:**
+
+All services use the singleton pattern:
+
+```typescript
+// client-service.ts
+class ClientService {
+  private static instance: ClientService;
+
+  private constructor() {}
+
+  static getInstance(): ClientService {
+    if (!ClientService.instance) {
+      ClientService.instance = new ClientService();
+    }
+    return ClientService.instance;
+  }
+
+  async getClientById(uid: string): Promise<ClientProfile> {
+    try {
+      const docRef = doc(db, "client-profile2", uid);
+      const docSnap = await getDoc(docRef);
+      
+      if (!docSnap.exists()) {
+        throw new Error("Client not found");
+      }
+      
+      return docSnap.data() as ClientProfile;
+    } catch (error) {
+      throw formatServiceError(error, "Failed to fetch client");
+    }
+  }
+
+  // More methods...
+}
+
+export default ClientService;
+```
+
+**Usage:**
+
+```typescript
+import ClientService from '../services/client-service';
+
+const clientService = ClientService.getInstance();
+const client = await clientService.getClientById(uid);
+```
+
+<Note>
+Always use `formatServiceError()` from `utils/serviceError.ts` when throwing errors in services.
+</Note>
+
+### `/context` - State Management
+
+**Purpose:** Global state using React Context
+
+```
+context/
+├── ClientDataContext.tsx        # Client data caching
+└── RecurringDeliveryContext.tsx # Recurring deliveries
+```
+
+**Context Usage:**
+
+```typescript
+// In a component
+import { useClientData } from '../context/ClientDataContext';
+
+const MyComponent = () => {
+  const { clients, loading, refreshClients } = useClientData();
+
+  // Use clients data
+  // Call refreshClients() after mutations
+};
+```
+
+**Available Contexts:**
+
+1. **AuthProvider** - User authentication and role (`auth/AuthProvider.tsx`)
+2. **ClientDataContext** - Client profiles and data
+3. **RecurringDeliveryContext** - Recurring delivery schedules
+4. **NotificationProvider** - Toast notifications
+
+### `/hooks` - Custom Hooks
+
+**Purpose:** Reusable React hooks
+
+```
+hooks/
+├── useCustomColumns.ts    # Spreadsheet column customization
+└── usePerformance.ts      # Performance monitoring
+```
+
+**Example Hook:**
+
+```typescript
+// usePerformance.ts
+import { useEffect } from 'react';
+import { performanceMonitor } from '../services/performance-monitor';
+
+export const usePerformance = (componentName: string) => {
+  useEffect(() => {
+    const startTime = performance.now();
+    
+    return () => {
+      const duration = performance.now() - startTime;
+      performanceMonitor.logRender(componentName, duration);
+    };
+  }, [componentName]);
+};
+```
+
+### `/config` - Configuration
+
+**Purpose:** Application configuration and constants
+
+```
+config/
+├── apiKeys.ts               # API keys and Firebase config
+├── exportConfig.ts          # CSV export configuration
+├── dataSources.config.json  # Data source definitions
+└── dataSources.ts           # Data source loader
+```
+
+**apiKeys.ts** - Centralized API key management:
+
+```typescript
+function getRequiredEnv(key: string): string {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(`Required environment variable ${key} is not set`);
+  }
+  return value;
+}
+
+export const firebaseConfig = {
+  apiKey: getRequiredEnv("REACT_APP_FIREBASE_API_KEY"),
+  authDomain: getRequiredEnv("REACT_APP_FIREBASE_AUTH_DOMAIN"),
+  // ...
+};
+
+export const googleMapsApiKey = getRequiredEnv("REACT_APP_GOOGLE_MAPS_API_KEY");
+```
+
+<Warning>
+Never hardcode API keys. Always use environment variables and import from `config/apiKeys.ts`.
+</Warning>
+
+### `/styles` - Global Styles
+
+**Purpose:** CSS variables and global styling
+
+```
+styles/
+├── theme.css              # CSS variables (colors, spacing, fonts)
+├── form-field-global.css  # Global MUI overrides
+└── index.css              # Global reset and base styles
+```
+
+**theme.css** - CSS variables:
+
+```css
+:root {
+  /* Colors */
+  --color-primary: #257E68;
+  --color-primary-light: #45a049;
+  --color-text-primary: #282c34;
+  --color-background-main: #ffffff;
+  
+  /* Spacing */
+  --spacing-xs: 0.3125rem;  /* 5px */
+  --spacing-sm: 0.625rem;   /* 10px */
+  --spacing-md: 1rem;       /* 16px */
+  --spacing-lg: 1.25rem;    /* 20px */
+  --spacing-xl: 2rem;       /* 32px */
+  
+  /* Typography */
+  --font-size-sm: 0.875rem;  /* 14px */
+  --font-size-base: 1rem;    /* 16px */
+  --font-size-lg: 1.25rem;   /* 20px */
+}
+```
+
+**Usage:**
+
+```css
+/* Component.module.css */
+.container {
+  padding: var(--spacing-md);
+  background-color: var(--color-background-main);
+  color: var(--color-text-primary);
+}
+```
+
+### `/types` - TypeScript Definitions
+
+**Purpose:** Shared TypeScript type definitions
+
+```
+types/
+├── client-types.ts       # Client profile types
+├── delivery-types.ts     # Delivery and event types
+├── user-types.ts         # User and auth types
+├── calendar-types.ts     # Calendar component types
+├── reports-types.ts      # Reporting types
+├── spreadsheet-types.ts  # Spreadsheet types
+└── index.ts              # Type exports
+```
+
+**Example Types:**
+
+```typescript
+// client-types.ts
+export interface ClientProfile {
+  uid: string;
+  firstName: string;
+  lastName: string;
+  address: string;
+  phone: string;
+  email?: string;
+  dietaryRestrictions?: string[];
+  active: boolean;
+  startDate: Date;
+  endDate?: Date;
+}
+
+// user-types.ts
+export enum UserType {
+  Admin = "admin",
+  Manager = "manager",
+  ClientIntake = "client-intake",
+  Driver = "driver",
+}
+```
+
+**Usage:**
+
+```typescript
+import { ClientProfile, UserType } from '../types';
+
+const client: ClientProfile = {
+  uid: '123',
+  firstName: 'John',
+  // ...
+};
+```
+
+### `/utils` - Utility Functions
+
+**Purpose:** Helper functions and utilities
+
+```
+utils/
+├── dates.ts                    # Date utilities
+├── dateValidation.ts           # Date validation
+├── timeUtils.ts                # Time operations (Luxon wrapper)
+├── format.ts                   # Formatting utilities
+├── validation.ts               # Form validation
+├── firestoreValidation.ts      # Firestore data validation
+├── serviceError.ts             # Error formatting
+├── retry.ts                    # Retry logic
+├── sorting.ts                  # Array sorting utilities
+├── searchFilter.ts             # Search and filter logic
+├── deliveryDate.ts             # Delivery date calculations
+├── lastDeliveryDate.ts         # Last delivery helpers
+├── deliveryCleanup.ts          # Delivery cleanup utilities
+├── deliveryEventEmitter.ts     # Event emitter for deliveries
+├── deliveryRouteClearNotice.ts # Route clearing notifications
+├── reportExport.ts             # Report export utilities
+├── timestamp.ts                # Firebase timestamp utilities
+├── misc.ts                     # Miscellaneous utilities
+└── index.ts                    # Utility exports
+```
+
+**Key Utilities:**
+
+**timeUtils.ts** - Luxon wrapper:
+
+```typescript
+import { TimeUtils } from '../utils/timeUtils';
+
+// Current time
+const now = TimeUtils.now();
+
+// Parse from any format
+const date = TimeUtils.fromAny('2024-01-15');
+
+// Format
+const formatted = TimeUtils.format(date, 'yyyy-MM-dd');
+```
+
+**serviceError.ts** - Error formatting:
+
+```typescript
+import { formatServiceError } from '../utils/serviceError';
+
+try {
+  await someOperation();
+} catch (error) {
+  throw formatServiceError(error, "Operation failed");
+}
+```
+
+**retry.ts** - Retry logic:
+
+```typescript
+import { retry } from '../utils/retry';
+
+const result = await retry(() => {
+  return someOperationThatMayFail();
+}, { maxAttempts: 3, delayMs: 1000 });
+```
+
+## Firebase Functions
+
+```
+functions-python/
+├── main.py                 # Function definitions
+├── requirements.txt        # Python dependencies
+├── geocoding/              # Geocoding functions
+├── clustering/             # Route optimization
+├── user_management/        # User operations
+└── scheduled_tasks/        # Cron jobs
+```
+
+## Naming Conventions
+
+### Files
+
+- **Components:** `PascalCase.tsx` (e.g., `ClientProfile.tsx`)
+- **Utilities:** `camelCase.ts` (e.g., `dateValidation.ts`)
+- **CSS Modules:** `PascalCase.module.css` (e.g., `ClientProfile.module.css`)
+- **Types:** `kebab-case-types.ts` (e.g., `client-types.ts`)
+
+### Code
+
+- **Components/Types/Enums:** `PascalCase`
+- **Variables/Functions:** `camelCase`
+- **Constants:** `UPPER_SNAKE_CASE`
+- **Booleans:** `is/has/should` prefix (e.g., `isLoading`, `hasError`)
+- **Event Handlers:** `handle/on` prefix (e.g., `handleClick`, `onSubmit`)
+- **Hooks:** `use` prefix (e.g., `useAuth`, `useClientData`)
+- **Services:** `Service` suffix (e.g., `ClientService`)
+
+## Adding New Code
+
+### Adding a Page
+
+1. Create component: `src/pages/NewPage/NewPage.tsx`
+2. Create styles: `src/pages/NewPage/NewPage.module.css`
+3. Add route in `src/routesConfig.tsx`
+4. Add to navigation in `src/pages/Base/Base.tsx`
+
+### Adding a Service
+
+1. Create file: `src/services/new-service.ts`
+2. Use singleton pattern
+3. Export in `src/services/index.ts`
+4. Add error handling with `formatServiceError()`
+
+### Adding Types
+
+1. Create file: `src/types/feature-types.ts`
+2. Define interfaces/types
+3. Export in `src/types/index.ts`
+
+### Adding Utilities
+
+1. Create file: `src/utils/newUtility.ts`
+2. Add utility functions
+3. Export in `src/utils/index.ts`
+
+## Next Steps
+
+- [Architecture](/development/architecture) - System architecture overview
+- [Tech Stack](/development/tech-stack) - Technology documentation
+- [Contributing](/development/contributing) - Development workflow
+- [Styling Guide](/development/styling-guide) - CSS and styling guidelines

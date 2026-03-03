@@ -1,0 +1,235 @@
+---
+title: "Geocoding Function"
+description: "Convert addresses to geographic coordinates using Google Maps Geocoding API"
+---
+
+## Overview
+
+The `geocode_addresses_endpoint` function converts a list of street addresses into geographic coordinates (latitude/longitude pairs) using the Google Maps Geocoding API. This function is used to prepare delivery addresses for route optimization and clustering.
+
+## Endpoint
+
+```
+POST https://us-central1-food-for-all-dc-caf23.cloudfunctions.net/geocode_addresses_endpoint
+```
+
+**Region:** `us-central1`  
+**Memory:** 512 MB  
+**Timeout:** 300 seconds
+
+## Authentication
+
+This endpoint requires Firebase Authentication. Include a valid Firebase ID token in the Authorization header.
+
+```
+Authorization: Bearer <firebase-id-token>
+```
+
+## Request
+
+<ParamField body="addresses" type="string[]" required>
+  Array of street addresses to geocode. Maximum 1000 addresses per request.
+  
+  Each address should be a complete street address string (e.g., "1600 Pennsylvania Ave NW, Washington, DC 20500").
+  
+  **Constraints:**
+  - Maximum 1000 addresses per request
+  - Each address must be a string
+  - Maximum 500 characters per address
+</ParamField>
+
+### Request Example
+
+<CodeGroup>
+```json Request Body
+{
+  "addresses": [
+    "1600 Pennsylvania Ave NW, Washington, DC 20500",
+    "400 E St SW, Washington, DC 20024",
+    "201 I St SE, Washington, DC 20003"
+  ]
+}
+```
+
+```javascript JavaScript/TypeScript
+const geocodeAddresses = async (addresses) => {
+  const user = auth.currentUser;
+  const token = await user.getIdToken();
+  
+  const response = await fetch(
+    'https://us-central1-food-for-all-dc-caf23.cloudfunctions.net/geocode_addresses_endpoint',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ addresses })
+    }
+  );
+  
+  return await response.json();
+};
+
+// Usage
+const result = await geocodeAddresses([
+  '1600 Pennsylvania Ave NW, Washington, DC 20500',
+  '400 E St SW, Washington, DC 20024'
+]);
+console.log(result.coordinates);
+```
+
+```python Python
+import requests
+
+def geocode_addresses(addresses, id_token):
+    url = 'https://us-central1-food-for-all-dc-caf23.cloudfunctions.net/geocode_addresses_endpoint'
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {id_token}'
+    }
+    payload = {'addresses': addresses}
+    
+    response = requests.post(url, json=payload, headers=headers)
+    return response.json()
+
+# Usage
+result = geocode_addresses([
+    '1600 Pennsylvania Ave NW, Washington, DC 20500',
+    '400 E St SW, Washington, DC 20024'
+], firebase_id_token)
+print(result['coordinates'])
+```
+
+```bash cURL
+curl -X POST \
+  https://us-central1-food-for-all-dc-caf23.cloudfunctions.net/geocode_addresses_endpoint \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_FIREBASE_ID_TOKEN" \
+  -d '{
+    "addresses": [
+      "1600 Pennsylvania Ave NW, Washington, DC 20500",
+      "400 E St SW, Washington, DC 20024"
+    ]
+  }'
+```
+</CodeGroup>
+
+## Response
+
+<ResponseField name="coordinates" type="array">
+  Array of coordinate tuples `[latitude, longitude]` corresponding to each input address.
+  
+  If an address cannot be geocoded, the function returns `[0.0, 0.0]` for that address.
+</ResponseField>
+
+### Success Response
+
+<CodeGroup>
+```json 200 OK
+{
+  "coordinates": [
+    [38.8976763, -77.0365298],
+    [38.8867217, -77.0047576],
+    [38.8794449, -76.9963331]
+  ]
+}
+```
+</CodeGroup>
+
+## Error Responses
+
+<ResponseField name="error" type="string">
+  Human-readable error message describing what went wrong.
+</ResponseField>
+
+<ResponseField name="details" type="array">
+  Array of validation error objects (only present for validation errors).
+  
+  Each error object contains:
+  - `field`: The field that failed validation
+  - `message`: Description of the validation error
+</ResponseField>
+
+### Error Examples
+
+<CodeGroup>
+```json 401 Unauthorized
+{
+  "error": "Authentication required."
+}
+```
+
+```json 400 Validation Error
+{
+  "error": "Validation error",
+  "details": [
+    {
+      "field": "addresses",
+      "message": "field required"
+    }
+  ]
+}
+```
+
+```json 400 Too Many Addresses
+{
+  "error": "Too many addresses in request."
+}
+```
+
+```json 400 Invalid Address
+{
+  "error": "Invalid address entry."
+}
+```
+
+```json 500 Internal Error
+{
+  "error": "Internal server error."
+}
+```
+</CodeGroup>
+
+## HTTP Status Codes
+
+| Status | Description |
+|--------|-------------|
+| `200` | Successfully geocoded all addresses |
+| `204` | OPTIONS preflight request successful |
+| `400` | Invalid request (validation error, too many addresses, invalid address format) |
+| `401` | Authentication required or invalid token |
+| `405` | Method not allowed (only POST and OPTIONS supported) |
+| `500` | Internal server error |
+
+## CORS Configuration
+
+The function allows requests from:
+- `http://localhost:3000` (local development)
+- `https://food-for-all-dc-caf23.web.app` (production)
+- `https://food-for-all-dc-caf23.firebaseapp.com` (production)
+
+## Implementation Details
+
+**Source:** `functions-python/clustering.py:162`
+
+The function:
+1. Validates authentication token
+2. Validates request payload (addresses array)
+3. Retrieves Google Maps API key from Secret Manager
+4. Geocodes each address using the Google Maps Geocoding API
+5. Returns coordinate pairs `[lat, lng]` for each address
+6. Falls back to `[0.0, 0.0]` if geocoding fails for an address
+
+## Rate Limits
+
+- **Maximum addresses:** 1000 per request
+- **Maximum address length:** 500 characters
+- **Function timeout:** 300 seconds
+
+## Notes
+
+- Addresses that cannot be geocoded return `[0.0, 0.0]` instead of failing the entire request
+- The function uses Google Secret Manager to securely access the Maps API key
+- Geocoding results depend on Google Maps API availability and accuracy
+- The function logs warnings for addresses that cannot be geocoded

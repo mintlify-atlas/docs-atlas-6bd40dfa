@@ -1,0 +1,455 @@
+---
+title: 'DriverService'
+description: 'Singleton service for managing driver data and Firebase operations'
+icon: 'id-card'
+---
+
+## Overview
+
+The `DriverService` is a singleton service that handles all driver-related operations with Firebase Firestore. It provides methods for CRUD operations, real-time subscriptions, and pagination.
+
+## Getting Started
+
+```typescript
+import DriverService from '@/services/driver-service';
+
+const driverService = DriverService.getInstance();
+const drivers = await driverService.getAllDrivers();
+```
+
+## Methods
+
+### getInstance
+
+Get the singleton instance of DriverService.
+
+```typescript
+static getInstance(): DriverService
+```
+
+**Returns:** The singleton DriverService instance
+
+**Example:**
+```typescript
+import DriverService from '@/services/driver-service';
+
+const service = DriverService.getInstance();
+```
+
+---
+
+### getAllDrivers
+
+Retrieve all drivers from the database.
+
+```typescript
+public async getAllDrivers(): Promise<Driver[]>
+```
+
+<ResponseField name="return" type="Promise<Driver[]>">
+  Array of all driver objects
+</ResponseField>
+
+**Example:**
+```typescript
+const drivers = await driverService.getAllDrivers();
+console.log(`Total drivers: ${drivers.length}`);
+
+drivers.forEach(driver => {
+  console.log(`${driver.name} - ${driver.phone}`);
+});
+```
+
+<Note>
+This method returns all drivers without pagination. For large datasets, consider using `getAllDriversPaginated` instead.
+</Note>
+
+---
+
+### getAllDriversPaginated
+
+Retrieve drivers with pagination support.
+
+```typescript
+public async getAllDriversPaginated(
+  pageSize = 50,
+  lastDoc?: unknown
+): Promise<{ drivers: Driver[]; lastDoc?: unknown }>
+```
+
+<ParamField path="pageSize" type="number" default="50">
+  Number of drivers to retrieve per page
+</ParamField>
+
+<ParamField path="lastDoc" type="unknown">
+  Last document from previous page for pagination
+</ParamField>
+
+<ResponseField name="drivers" type="Driver[]">
+  Array of driver objects for the current page
+</ResponseField>
+
+<ResponseField name="lastDoc" type="unknown">
+  Last document for pagination continuation
+</ResponseField>
+
+**Example:**
+```typescript
+// First page
+const { drivers, lastDoc } = await driverService.getAllDriversPaginated(25);
+
+console.log(`Page 1: ${drivers.length} drivers`);
+
+// Next page
+if (lastDoc) {
+  const nextPage = await driverService.getAllDriversPaginated(25, lastDoc);
+  console.log(`Page 2: ${nextPage.drivers.length} drivers`);
+}
+```
+
+<Note>
+Results are ordered by driver ID and filtered for valid driver objects only.
+</Note>
+
+---
+
+### getDriverById
+
+Retrieve a single driver by their unique identifier.
+
+```typescript
+public async getDriverById(id: string): Promise<Driver | null>
+```
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the driver
+</ParamField>
+
+<ResponseField name="return" type="Promise<Driver | null>">
+  Returns the driver object if found, null otherwise
+</ResponseField>
+
+**Example:**
+```typescript
+const driver = await driverService.getDriverById('driver-123');
+
+if (driver) {
+  console.log(`Driver: ${driver.name}`);
+  console.log(`Phone: ${driver.phone}`);
+  console.log(`Email: ${driver.email}`);
+} else {
+  console.log('Driver not found');
+}
+```
+
+<Note>
+This method uses automatic retry logic for transient Firebase errors.
+</Note>
+
+---
+
+### subscribeToAllDrivers
+
+Subscribe to real-time updates for all drivers.
+
+```typescript
+public subscribeToAllDrivers(
+  onData: (drivers: Driver[]) => void,
+  onError?: (error: ServiceError) => void
+): () => void
+```
+
+<ParamField path="onData" type="(drivers: Driver[]) => void" required>
+  Callback function invoked when driver data changes
+</ParamField>
+
+<ParamField path="onError" type="(error: ServiceError) => void">
+  Optional error handler for subscription errors
+</ParamField>
+
+<ResponseField name="return" type="() => void">
+  Unsubscribe function to stop listening to updates
+</ResponseField>
+
+**Example:**
+```typescript
+const unsubscribe = driverService.subscribeToAllDrivers(
+  (drivers) => {
+    console.log(`Received ${drivers.length} drivers`);
+    // Update UI with latest driver data
+  },
+  (error) => {
+    console.error('Subscription error:', error);
+  }
+);
+
+// Later, when component unmounts
+unsubscribe();
+```
+
+<Warning>
+Remember to call the unsubscribe function when your component unmounts to prevent memory leaks.
+</Warning>
+
+**React Example:**
+```typescript
+import { useEffect, useState } from 'react';
+import DriverService from '@/services/driver-service';
+import { Driver } from '@/types';
+
+function DriverList() {
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+
+  useEffect(() => {
+    const driverService = DriverService.getInstance();
+    
+    const unsubscribe = driverService.subscribeToAllDrivers(
+      (updatedDrivers) => setDrivers(updatedDrivers),
+      (error) => console.error(error)
+    );
+
+    return () => unsubscribe();
+  }, []);
+
+  return (
+    <div>
+      {drivers.map(driver => (
+        <div key={driver.id}>{driver.name}</div>
+      ))}
+    </div>
+  );
+}
+```
+
+---
+
+### subscribeToDriverById
+
+Subscribe to real-time updates for a specific driver.
+
+```typescript
+public subscribeToDriverById(
+  id: string,
+  onData: (driver: Driver | null) => void,
+  onError?: (error: ServiceError) => void
+): () => void
+```
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the driver
+</ParamField>
+
+<ParamField path="onData" type="(driver: Driver | null) => void" required>
+  Callback function invoked when driver data changes
+</ParamField>
+
+<ParamField path="onError" type="(error: ServiceError) => void">
+  Optional error handler for subscription errors
+</ParamField>
+
+<ResponseField name="return" type="() => void">
+  Unsubscribe function to stop listening to updates
+</ResponseField>
+
+**Example:**
+```typescript
+const unsubscribe = driverService.subscribeToDriverById(
+  'driver-123',
+  (driver) => {
+    if (driver) {
+      console.log(`Driver updated: ${driver.name}`);
+    } else {
+      console.log('Driver deleted or not found');
+    }
+  },
+  (error) => {
+    console.error('Subscription error:', error);
+  }
+);
+
+// Cleanup
+unsubscribe();
+```
+
+---
+
+### createDriver
+
+Create a new driver.
+
+```typescript
+public async createDriver(driver: Omit<Driver, "id">): Promise<string>
+```
+
+<ParamField path="driver" type="Omit<Driver, 'id'>" required>
+  Driver data without the ID field (Firebase generates the ID)
+</ParamField>
+
+<ResponseField name="return" type="Promise<string>">
+  The ID of the newly created driver
+</ResponseField>
+
+**Example:**
+```typescript
+const newDriver = {
+  name: 'John Smith',
+  phone: '202-555-0123',
+  email: 'john.smith@example.com',
+  isActive: true
+};
+
+const driverId = await driverService.createDriver(newDriver);
+console.log(`Created driver with ID: ${driverId}`);
+```
+
+**Error Handling:**
+```typescript
+import { ServiceError } from '@/utils/serviceError';
+
+try {
+  const driverId = await driverService.createDriver(newDriver);
+  console.log('Success:', driverId);
+} catch (error) {
+  if (error instanceof ServiceError) {
+    console.error('Failed to create driver:', error.message);
+  }
+}
+```
+
+---
+
+### updateDriver
+
+Update an existing driver's information.
+
+```typescript
+public async updateDriver(id: string, data: Partial<Driver>): Promise<void>
+```
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the driver to update
+</ParamField>
+
+<ParamField path="data" type="Partial<Driver>" required>
+  Partial driver data to update
+</ParamField>
+
+**Example:**
+```typescript
+await driverService.updateDriver('driver-123', {
+  phone: '202-555-9999',
+  email: 'newemail@example.com'
+});
+
+console.log('Driver updated successfully');
+```
+
+**Multiple Field Update:**
+```typescript
+await driverService.updateDriver('driver-123', {
+  name: 'John A. Smith',
+  phone: '202-555-9999',
+  email: 'john.a.smith@example.com',
+  isActive: false
+});
+```
+
+<Note>
+Only the fields provided in the `data` parameter will be updated. Other fields remain unchanged.
+</Note>
+
+---
+
+### deleteDriver
+
+Delete a driver from the database.
+
+```typescript
+public async deleteDriver(id: string): Promise<void>
+```
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the driver to delete
+</ParamField>
+
+**Example:**
+```typescript
+await driverService.deleteDriver('driver-123');
+console.log('Driver deleted successfully');
+```
+
+**With Confirmation:**
+```typescript
+const confirmDelete = confirm('Are you sure you want to delete this driver?');
+
+if (confirmDelete) {
+  try {
+    await driverService.deleteDriver('driver-123');
+    console.log('Driver deleted');
+  } catch (error) {
+    console.error('Failed to delete driver:', error);
+  }
+}
+```
+
+<Warning>
+This operation cannot be undone. Make sure to verify the driver ID before deletion.
+</Warning>
+
+## Data Validation
+
+All driver objects are validated using the `validateDriver` function before being returned:
+
+```typescript
+import { validateDriver } from '@/utils/firestoreValidation';
+
+// Only valid driver objects are returned from service methods
+const drivers = await driverService.getAllDrivers();
+// All drivers in the array have passed validation
+```
+
+## Error Handling
+
+All methods throw `ServiceError` exceptions with descriptive messages:
+
+```typescript
+import { ServiceError } from '@/utils/serviceError';
+
+try {
+  await driverService.updateDriver('driver-123', data);
+} catch (error) {
+  if (error instanceof ServiceError) {
+    console.error(`Error code: ${error.code}`);
+    console.error(`Error message: ${error.message}`);
+  }
+}
+```
+
+## Driver Type Definition
+
+The Driver interface typically includes:
+
+```typescript
+interface Driver {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  isActive: boolean;
+  // ... other fields as defined in your types
+}
+```
+
+## Best Practices
+
+1. **Use Real-time Subscriptions**: For UI components that need live updates, prefer `subscribeToAllDrivers` or `subscribeToDriverById` over polling with `getAllDrivers`.
+
+2. **Pagination**: For large driver lists, use `getAllDriversPaginated` to improve performance and reduce memory usage.
+
+3. **Error Handling**: Always wrap service calls in try-catch blocks to handle potential errors gracefully.
+
+4. **Cleanup Subscriptions**: Always unsubscribe from real-time listeners when components unmount.
+
+## Source Reference
+
+See the full implementation at `src/services/driver-service.ts`

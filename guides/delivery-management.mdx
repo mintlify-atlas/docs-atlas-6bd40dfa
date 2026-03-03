@@ -1,0 +1,314 @@
+---
+title: Delivery Management
+description: Learn how to create, schedule, and manage food deliveries in the calendar
+---
+
+## Overview
+
+The delivery management system allows you to schedule deliveries, assign drivers, and track delivery status. This guide covers the complete delivery workflow from scheduling to completion.
+
+## Accessing the Calendar
+
+<Steps>
+  <Step title="Navigate to the Calendar">
+    Click **Calendar** in the main navigation menu to open the delivery calendar.
+  </Step>
+
+  <Step title="Choose your view">
+    Select between:
+    - **Day View** - Detailed view of a single day's deliveries
+    - **Month View** - Overview of all deliveries across the month
+  </Step>
+</Steps>
+
+## Creating a New Delivery
+
+<Steps>
+  <Step title="Open the Add Delivery dialog">
+    Click the **Add Delivery** button (+ icon) in the calendar header.
+  </Step>
+
+  <Step title="Select the client">
+    - Start typing the client's name in the search field
+    - Select the correct client from the dropdown list
+    - The system will pre-fill delivery preferences from the client profile
+  </Step>
+
+  <Step title="Choose the delivery date">
+    Select the date for the delivery. The system will show:
+    - Current delivery capacity for that day
+    - Warning if the day is at or over capacity
+    - Daily limit based on configured constraints
+  </Step>
+
+  <Step title="Set recurrence pattern">
+    Choose how often the delivery should repeat:
+    - **None** - One-time delivery only
+    - **Weekly** - Repeats every week
+    - **Bi-Weekly** - Repeats every two weeks
+    - **Monthly** - Repeats monthly
+    - **Custom** - Select specific dates from a calendar
+  </Step>
+
+  <Step title="Set end date (for recurring deliveries)">
+    If you selected Weekly, Bi-Weekly, or Monthly:
+    - Enter the **Repeats End Date** when the recurring deliveries should stop
+    - The system will automatically calculate all delivery dates in the series
+  </Step>
+
+  <Step title="Review and confirm">
+    - Check the delivery summary
+    - Verify the number of deliveries being created
+    - Click **Add Delivery** to confirm
+  </Step>
+</Steps>
+
+<Note>
+The system automatically checks for duplicate deliveries. If the client already has a delivery scheduled on a particular date, that date will be skipped.
+</Note>
+
+## Delivery Recurrence Options
+
+### One-Time Delivery
+Schedules a single delivery on the selected date.
+
+### Weekly Delivery
+- Repeats every 7 days from the start date
+- Continues until the end date
+- Example: Every Monday from 1/1/2024 to 3/31/2024
+
+### Bi-Weekly Delivery
+- Repeats every 14 days from the start date
+- Useful for clients receiving deliveries every other week
+- Example: Every other Tuesday from 1/2/2024 to 6/30/2024
+
+### Monthly Delivery
+- Repeats on the same day of the month
+- Continues until the end date
+- Example: 15th of each month from 1/15/2024 to 12/15/2024
+
+### Custom Dates
+- Select specific dates from a calendar
+- Useful for irregular schedules
+- Each date is individually selected
+
+<Warning>
+Recurring deliveries create multiple delivery events. Make sure the end date is correct before confirming, as this will create all delivery records at once.
+</Warning>
+
+## Understanding Delivery Capacity
+
+The system tracks daily delivery limits:
+
+- Each day has a configured maximum number of deliveries
+- The calendar shows current capacity vs. limit
+- Color-coded warnings indicate when approaching or exceeding capacity:
+  - **Green** - Within capacity
+  - **Yellow** - Near capacity
+  - **Red** - Over capacity
+
+<Tip>
+You can still schedule deliveries when over capacity, but it's recommended to stay within limits for operational efficiency.
+</Tip>
+
+## Viewing Deliveries
+
+### Day View
+
+The Day View displays:
+- All deliveries scheduled for the selected day
+- Client names and addresses
+- Assigned drivers
+- Delivery times
+- Clusters and routes
+- Delivery instructions
+- Dietary restrictions
+
+<Steps>
+  <Step title="Navigate between days">
+    - Click **Previous** to go to the previous day
+    - Click **Next** to go to the next day
+    - Click **Today** to return to today's date
+  </Step>
+
+  <Step title="View delivery details">
+    Click on any delivery card to see:
+    - Full client information
+    - Complete address
+    - Phone number
+    - Delivery notes
+    - Dietary restrictions
+  </Step>
+</Steps>
+
+### Month View
+
+The Month View shows:
+- Number of deliveries per day
+- Capacity indicators for each day
+- Color-coded days based on capacity
+
+<Steps>
+  <Step title="Navigate between months">
+    - Click **Previous** to go to the previous month
+    - Click **Next** to go to the next month
+    - Click **Today** to return to the current month
+  </Step>
+
+  <Step title="View a specific day">
+    Click on any date in the month view to switch to Day View for that date.
+  </Step>
+</Steps>
+
+## Editing Deliveries
+
+<Steps>
+  <Step title="Locate the delivery">
+    Find the delivery in either Day or Month view.
+  </Step>
+
+  <Step title="Open delivery details">
+    Click on the delivery to view its details.
+  </Step>
+
+  <Step title="Make changes">
+    You can update:
+    - Delivery date
+    - Assigned driver
+    - Delivery time
+    - Notes
+  </Step>
+
+  <Step title="Save changes">
+    Click **Save** to update the delivery.
+  </Step>
+</Steps>
+
+<Warning>
+Changes to a single delivery in a recurring series will only affect that specific delivery, not the entire series.
+</Warning>
+
+## Deleting Deliveries
+
+<Steps>
+  <Step title="Select the delivery">
+    Click on the delivery you want to delete.
+  </Step>
+
+  <Step title="Confirm deletion">
+    Click the **Delete** button and confirm the action.
+  </Step>
+</Steps>
+
+<Note>
+Deleting a delivery is permanent. The system will ask for confirmation before proceeding.
+</Note>
+
+## Managing Recurring Deliveries
+
+### Viewing Recurring Series
+
+Deliveries that are part of a recurring series will show:
+- Recurrence pattern (Weekly, Bi-Weekly, Monthly)
+- Series start date
+- Series end date
+
+### Editing Recurring Series
+
+When editing a recurring delivery:
+- Changes apply only to the selected instance
+- To modify the entire series, you must delete and recreate it
+
+### Canceling Future Deliveries
+
+<Steps>
+  <Step title="Identify the series">
+    Find any delivery in the recurring series.
+  </Step>
+
+  <Step title="Delete future instances">
+    Manually delete each future delivery you want to cancel, or delete all remaining deliveries by updating the client's end date.
+  </Step>
+</Steps>
+
+## Delivery Status
+
+Track delivery completion:
+
+- **Scheduled** - Delivery is planned but not yet completed
+- **Completed** - Delivery has been made
+- **Past Due** - Delivery date has passed
+
+<Note>
+Completed deliveries appear in the client's delivery history on their profile page.
+</Note>
+
+## Capacity Management
+
+### Viewing Daily Limits
+
+<Steps>
+  <Step title="Open the limits editor">
+    In Month view, click the **Edit Limits** button.
+  </Step>
+
+  <Step title="Review current limits">
+    See the maximum deliveries allowed for each day of the week.
+  </Step>
+</Steps>
+
+### Understanding Limit Warnings
+
+The system provides visual indicators:
+- Days with available capacity appear normal
+- Days approaching capacity show warnings
+- Days over capacity are highlighted in red
+
+<Tip>
+Plan deliveries in advance to distribute load evenly across available days.
+</Tip>
+
+## Best Practices
+
+<Steps>
+  <Step title="Schedule deliveries in advance">
+    Create delivery schedules at least one week ahead to allow for route planning.
+  </Step>
+
+  <Step title="Use recurring deliveries for regular clients">
+    Set up weekly or bi-weekly recurring deliveries for clients with consistent needs.
+  </Step>
+
+  <Step title="Monitor capacity daily">
+    Check the calendar regularly to ensure balanced delivery loads.
+  </Step>
+
+  <Step title="Update delivery information promptly">
+    If a client's address or delivery instructions change, update the profile immediately.
+  </Step>
+
+  <Step title="Review delivery history">
+    Use the client profile to view past deliveries and ensure service continuity.
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+**"This date is over capacity"**
+- Consider scheduling for a different day
+- Check if the delivery is urgent or can be moved
+- Verify that daily limits are set correctly
+
+**"Client already has a delivery on this date"**
+- The client is already scheduled for that day
+- Check the calendar to see the existing delivery
+- Choose a different date or edit the existing delivery
+
+**Delivery not appearing in calendar**
+- Refresh the page
+- Check that you're viewing the correct date range
+- Verify the delivery was saved successfully
+
+<Warning>
+If you experience persistent issues with deliveries not saving or appearing, contact your system administrator.
+</Warning>

@@ -1,0 +1,665 @@
+---
+title: 'DeliveryService'
+description: 'Singleton service for managing delivery events and schedules'
+icon: 'truck'
+---
+
+## Overview
+
+The `DeliveryService` is a singleton service that handles all delivery-related operations with Firebase Firestore. It manages delivery events, scheduling, limits, clustering, and provides optimized methods for calendar operations.
+
+## Getting Started
+
+```typescript
+import DeliveryService from '@/services/delivery-service';
+
+const deliveryService = DeliveryService.getInstance();
+const events = await deliveryService.getAllEvents();
+```
+
+## Methods
+
+### getInstance
+
+Get the singleton instance of DeliveryService.
+
+```typescript
+static getInstance(): DeliveryService
+```
+
+**Returns:** The singleton DeliveryService instance
+
+**Example:**
+```typescript
+import DeliveryService from '@/services/delivery-service';
+
+const service = DeliveryService.getInstance();
+```
+
+---
+
+### getAllEvents
+
+Retrieve all delivery events from the database.
+
+```typescript
+public async getAllEvents(): Promise<DeliveryEvent[]>
+```
+
+<ResponseField name="return" type="Promise<DeliveryEvent[]>">
+  Array of all delivery events
+</ResponseField>
+
+**Example:**
+```typescript
+const events = await deliveryService.getAllEvents();
+console.log(`Total events: ${events.length}`);
+```
+
+<Note>
+Delivery dates are automatically normalized to JavaScript Date objects.
+</Note>
+
+---
+
+### getEventsByDateRange
+
+Retrieve delivery events within a specific date range.
+
+```typescript
+public async getEventsByDateRange(
+  startDate: Date,
+  endDate: Date
+): Promise<DeliveryEvent[]>
+```
+
+<ParamField path="startDate" type="Date" required>
+  Start of the date range (inclusive)
+</ParamField>
+
+<ParamField path="endDate" type="Date" required>
+  End of the date range (exclusive)
+</ParamField>
+
+<ResponseField name="return" type="Promise<DeliveryEvent[]>">
+  Array of delivery events within the date range, ordered by deliveryDate ascending
+</ResponseField>
+
+**Example:**
+```typescript
+const startDate = new Date('2024-01-01');
+const endDate = new Date('2024-01-31');
+const events = await deliveryService.getEventsByDateRange(startDate, endDate);
+```
+
+<Note>
+Dates are normalized to start of day in UTC for consistent querying.
+</Note>
+
+---
+
+### getEventCountsForDates
+
+Get delivery event counts keyed by date (yyyy-MM-dd format).
+
+```typescript
+public async getEventCountsForDates(
+  dateKeys: string[]
+): Promise<Record<string, number>>
+```
+
+<ParamField path="dateKeys" type="string[]" required>
+  Array of date strings in ISO format (yyyy-MM-dd)
+</ParamField>
+
+<ResponseField name="return" type="Promise<Record<string, number>>">
+  Object mapping date keys to delivery counts
+</ResponseField>
+
+**Example:**
+```typescript
+const counts = await deliveryService.getEventCountsForDates([
+  '2024-01-15',
+  '2024-01-16',
+  '2024-01-17'
+]);
+console.log(counts);
+// { '2024-01-15': 45, '2024-01-16': 52, '2024-01-17': 38 }
+```
+
+---
+
+### createEvent
+
+Create a single delivery event.
+
+```typescript
+public async createEvent(event: Partial<DeliveryEvent>): Promise<string>
+```
+
+<ParamField path="event" type="Partial<DeliveryEvent>" required>
+  The delivery event data to create
+</ParamField>
+
+<ResponseField name="return" type="Promise<string>">
+  The ID of the created delivery event
+</ResponseField>
+
+**Example:**
+```typescript
+const eventId = await deliveryService.createEvent({
+  clientId: 'client-123',
+  deliveryDate: new Date('2024-01-15'),
+  recurrence: 'Weekly',
+  status: 'scheduled'
+});
+console.log('Created event:', eventId);
+```
+
+<Note>
+This method automatically invalidates cluster assignments for the delivery date and clears the recurring delivery cache.
+</Note>
+
+---
+
+### createEventsBatch
+
+Create multiple delivery events in a batch operation.
+
+```typescript
+public async createEventsBatch(
+  events: Partial<DeliveryEvent>[]
+): Promise<string[]>
+```
+
+<ParamField path="events" type="Partial<DeliveryEvent>[]" required>
+  Array of delivery event data to create
+</ParamField>
+
+<ResponseField name="return" type="Promise<string[]>">
+  Array of created event IDs
+</ResponseField>
+
+**Example:**
+```typescript
+const events = [
+  { clientId: 'client-1', deliveryDate: new Date('2024-01-15'), recurrence: 'Weekly' },
+  { clientId: 'client-2', deliveryDate: new Date('2024-01-15'), recurrence: 'BiWeekly' },
+  { clientId: 'client-3', deliveryDate: new Date('2024-01-16'), recurrence: 'Monthly' }
+];
+
+const eventIds = await deliveryService.createEventsBatch(events);
+console.log(`Created ${eventIds.length} events`);
+```
+
+<Note>
+Batch operations are processed in chunks of 500 (Firebase batch write limit).
+</Note>
+
+---
+
+### updateEvent
+
+Update an existing delivery event.
+
+```typescript
+public async updateEvent(
+  id: string,
+  data: Partial<DeliveryEvent>
+): Promise<void>
+```
+
+<ParamField path="id" type="string" required>
+  The ID of the event to update
+</ParamField>
+
+<ParamField path="data" type="Partial<DeliveryEvent>" required>
+  Partial event data to update
+</ParamField>
+
+**Example:**
+```typescript
+await deliveryService.updateEvent('event-123', {
+  status: 'completed',
+  notes: 'Delivered successfully'
+});
+```
+
+<Note>
+Invalidates cluster assignments for both the old and new delivery dates if the date is changed.
+</Note>
+
+---
+
+### deleteEvent
+
+Delete a delivery event.
+
+```typescript
+public async deleteEvent(id: string): Promise<void>
+```
+
+<ParamField path="id" type="string" required>
+  The ID of the event to delete
+</ParamField>
+
+**Example:**
+```typescript
+await deliveryService.deleteEvent('event-123');
+```
+
+<Warning>
+This operation cannot be undone. Cluster assignments for the delivery date will be cleared.
+</Warning>
+
+---
+
+### deleteEventsByClientId
+
+Delete all delivery events for a specific client.
+
+```typescript
+public async deleteEventsByClientId(clientId: string): Promise<void>
+```
+
+<ParamField path="clientId" type="string" required>
+  The client ID whose events should be deleted
+</ParamField>
+
+**Example:**
+```typescript
+await deliveryService.deleteEventsByClientId('client-123');
+```
+
+<Warning>
+This deletes all delivery events for the client. This operation cannot be undone.
+</Warning>
+
+---
+
+### getEventsByClientId
+
+Retrieve all delivery events for a specific client.
+
+```typescript
+public async getEventsByClientId(clientId: string): Promise<DeliveryEvent[]>
+```
+
+<ParamField path="clientId" type="string" required>
+  The client ID to fetch events for
+</ParamField>
+
+<ResponseField name="return" type="Promise<DeliveryEvent[]>">
+  Array of delivery events for the client
+</ResponseField>
+
+**Example:**
+```typescript
+const events = await deliveryService.getEventsByClientId('client-123');
+console.log(`Client has ${events.length} scheduled deliveries`);
+```
+
+---
+
+### getPreviousDeliveries
+
+Get the previous 5 deliveries for a client.
+
+```typescript
+public async getPreviousDeliveries(clientId: string): Promise<DeliveryEvent[]>
+```
+
+<ParamField path="clientId" type="string" required>
+  The client ID to fetch deliveries for
+</ParamField>
+
+<ResponseField name="return" type="Promise<DeliveryEvent[]>">
+  Array of up to 5 past delivery events, ordered by date descending
+</ResponseField>
+
+**Example:**
+```typescript
+const pastDeliveries = await deliveryService.getPreviousDeliveries('client-123');
+pastDeliveries.forEach(delivery => {
+  console.log(`Delivered on: ${delivery.deliveryDate}`);
+});
+```
+
+---
+
+### getNextDeliveries
+
+Get the next 5 deliveries for a client.
+
+```typescript
+public async getNextDeliveries(clientId: string): Promise<DeliveryEvent[]>
+```
+
+<ParamField path="clientId" type="string" required>
+  The client ID to fetch deliveries for
+</ParamField>
+
+<ResponseField name="return" type="Promise<DeliveryEvent[]>">
+  Array of up to 5 future delivery events, ordered by date ascending
+</ResponseField>
+
+**Example:**
+```typescript
+const upcomingDeliveries = await deliveryService.getNextDeliveries('client-123');
+console.log(`Next delivery: ${upcomingDeliveries[0]?.deliveryDate}`);
+```
+
+---
+
+### getClientDeliveryHistory
+
+Get both past and future deliveries for a client in one call.
+
+```typescript
+public async getClientDeliveryHistory(clientId: string): Promise<{
+  pastDeliveries: DeliveryEvent[];
+  futureDeliveries: DeliveryEvent[];
+}>
+```
+
+<ParamField path="clientId" type="string" required>
+  The client ID to fetch delivery history for
+</ParamField>
+
+<ResponseField name="pastDeliveries" type="DeliveryEvent[]">
+  Array of up to 5 past deliveries
+</ResponseField>
+
+<ResponseField name="futureDeliveries" type="DeliveryEvent[]">
+  Array of up to 5 future deliveries
+</ResponseField>
+
+**Example:**
+```typescript
+const { pastDeliveries, futureDeliveries } = 
+  await deliveryService.getClientDeliveryHistory('client-123');
+
+console.log(`Past: ${pastDeliveries.length}, Future: ${futureDeliveries.length}`);
+```
+
+---
+
+### getRecurringDeliveryDateRange
+
+Get the earliest and latest delivery dates for a client's recurring deliveries.
+
+```typescript
+public async getRecurringDeliveryDateRange(
+  clientId: string,
+  recurrenceType: string
+): Promise<{ earliest: Date | null; latest: Date | null }>
+```
+
+<ParamField path="clientId" type="string" required>
+  The client ID to check
+</ParamField>
+
+<ParamField path="recurrenceType" type="string" required>
+  The recurrence type (e.g., 'Weekly', 'BiWeekly', 'Monthly', 'None')
+</ParamField>
+
+<ResponseField name="earliest" type="Date | null">
+  Earliest delivery date, or null if no deliveries found
+</ResponseField>
+
+<ResponseField name="latest" type="Date | null">
+  Latest delivery date, or null if no deliveries found
+</ResponseField>
+
+**Example:**
+```typescript
+const { earliest, latest } = await deliveryService.getRecurringDeliveryDateRange(
+  'client-123',
+  'Weekly'
+);
+
+if (earliest && latest) {
+  console.log(`Deliveries from ${earliest} to ${latest}`);
+}
+```
+
+<Note>
+Results are cached for 5 minutes to improve performance for calendar operations.
+</Note>
+
+---
+
+### getBatchRecurringDeliveryDateRanges
+
+Batch get recurring delivery date ranges for multiple clients (optimized).
+
+```typescript
+public async getBatchRecurringDeliveryDateRanges(
+  requests: Array<{ clientId: string; recurrenceType: string }>
+): Promise<Map<string, { earliest: Date | null; latest: Date | null }>>
+```
+
+<ParamField path="requests" type="Array<{ clientId: string; recurrenceType: string }>" required>
+  Array of client ID and recurrence type pairs
+</ParamField>
+
+<ResponseField name="return" type="Promise<Map<string, { earliest: Date | null; latest: Date | null }>>">
+  Map keyed by "clientId-recurrenceType" containing date ranges
+</ResponseField>
+
+**Example:**
+```typescript
+const requests = [
+  { clientId: 'client-1', recurrenceType: 'Weekly' },
+  { clientId: 'client-2', recurrenceType: 'BiWeekly' },
+  { clientId: 'client-3', recurrenceType: 'Monthly' }
+];
+
+const ranges = await deliveryService.getBatchRecurringDeliveryDateRanges(requests);
+const range1 = ranges.get('client-1-Weekly');
+```
+
+<Note>
+This method is highly optimized for calendar lazy loading, grouping queries by recurrence type.
+</Note>
+
+---
+
+### clearDateRangeCache
+
+Clear the date range cache.
+
+```typescript
+public clearDateRangeCache(): void
+```
+
+**Example:**
+```typescript
+deliveryService.clearDateRangeCache();
+```
+
+<Note>
+Useful when new deliveries are added and you want to ensure fresh data.
+</Note>
+
+---
+
+### getDailyLimits
+
+Get all daily delivery limits.
+
+```typescript
+public async getDailyLimits(): Promise<{ id: string; date: string; limit: number }[]>
+```
+
+<ResponseField name="return" type="Promise<Array<{ id: string; date: string; limit: number }>>">
+  Array of daily limit configurations
+</ResponseField>
+
+**Example:**
+```typescript
+const limits = await deliveryService.getDailyLimits();
+limits.forEach(({ date, limit }) => {
+  console.log(`${date}: ${limit} deliveries`);
+});
+```
+
+---
+
+### setDailyLimit
+
+Set the delivery limit for a specific date.
+
+```typescript
+public async setDailyLimit(dateKey: string, limit: number): Promise<void>
+```
+
+<ParamField path="dateKey" type="string" required>
+  Date in ISO format (yyyy-MM-dd)
+</ParamField>
+
+<ParamField path="limit" type="number" required>
+  Maximum number of deliveries allowed
+</ParamField>
+
+**Example:**
+```typescript
+await deliveryService.setDailyLimit('2024-01-15', 75);
+```
+
+---
+
+### getWeeklyLimits
+
+Get the weekly delivery limits by day of week.
+
+```typescript
+public async getWeeklyLimits(): Promise<Record<string, number>>
+```
+
+<ResponseField name="return" type="Promise<Record<string, number>>">
+  Object mapping day names to limits
+</ResponseField>
+
+**Example:**
+```typescript
+const limits = await deliveryService.getWeeklyLimits();
+console.log(`Monday limit: ${limits.monday}`);
+console.log(`Thursday limit: ${limits.thursday}`);
+```
+
+<Note>
+Returns default limits (60 for most days, 90 for Thursday/Friday) if no custom limits are set.
+</Note>
+
+---
+
+### updateWeeklyLimits
+
+Update the weekly delivery limits.
+
+```typescript
+public async updateWeeklyLimits(limits: Record<string, number>): Promise<void>
+```
+
+<ParamField path="limits" type="Record<string, number>" required>
+  Object mapping day names (lowercase) to limit numbers
+</ParamField>
+
+**Example:**
+```typescript
+await deliveryService.updateWeeklyLimits({
+  sunday: 50,
+  monday: 60,
+  tuesday: 60,
+  wednesday: 60,
+  thursday: 90,
+  friday: 90,
+  saturday: 50
+});
+```
+
+---
+
+### clearClusterAssignmentsForDateKeys
+
+Clear cluster assignments for specific dates.
+
+```typescript
+public async clearClusterAssignmentsForDateKeys(
+  dateKeys: string[]
+): Promise<ClusterInvalidationResult>
+```
+
+<ParamField path="dateKeys" type="string[]" required>
+  Array of date strings in ISO format
+</ParamField>
+
+<ResponseField name="impactedDateKeys" type="string[]">
+  Normalized list of impacted dates
+</ResponseField>
+
+<ResponseField name="clearedDateKeys" type="string[]">
+  Dates where clusters were successfully cleared
+</ResponseField>
+
+<ResponseField name="failedDateKeys" type="string[]">
+  Dates where clearing failed
+</ResponseField>
+
+<ResponseField name="clearedDocCount" type="number">
+  Total number of cluster documents cleared
+</ResponseField>
+
+**Example:**
+```typescript
+const result = await deliveryService.clearClusterAssignmentsForDateKeys([
+  '2024-01-15',
+  '2024-01-16'
+]);
+console.log(`Cleared ${result.clearedDocCount} cluster documents`);
+```
+
+<Note>
+Automatically called when creating, updating, or deleting delivery events.
+</Note>
+
+## Event Emitter
+
+The DeliveryService emits delivery change events that can be subscribed to:
+
+```typescript
+import { deliveryEventEmitter } from '@/utils/deliveryEventEmitter';
+
+deliveryEventEmitter.subscribe((event) => {
+  console.log('Delivery change:', event.reason);
+  console.log('Impacted dates:', event.impactedDateKeys);
+});
+```
+
+**Event Reasons:**
+- `schedule-created`: Single event created
+- `schedule-created-batch`: Multiple events created
+- `schedule-updated`: Event updated
+- `schedule-deleted`: Event deleted
+- `schedule-batch-deleted`: Multiple events deleted
+
+## Error Handling
+
+All methods throw `ServiceError` exceptions:
+
+```typescript
+import { ServiceError } from '@/utils/serviceError';
+
+try {
+  await deliveryService.createEvent(eventData);
+} catch (error) {
+  if (error instanceof ServiceError) {
+    console.error(`Error: ${error.message}`);
+  }
+}
+```
+
+## Source Reference
+
+See the full implementation at `src/services/delivery-service.ts`

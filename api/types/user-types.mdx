@@ -1,0 +1,495 @@
+---
+title: "User Types"
+description: "TypeScript interfaces and enums for users, staff, and authentication"
+---
+
+## Overview
+
+User types define the structure for case workers, authentication, user roles, and staff management in the Food For All DC system.
+
+## CaseWorker
+
+Interface representing a case worker or referral partner.
+
+<ResponseField name="id" type="string" required>
+  Unique identifier for the case worker
+</ResponseField>
+
+<ResponseField name="name" type="string" required>
+  Case worker's full name
+</ResponseField>
+
+<ResponseField name="organization" type="string" required>
+  Organization the case worker represents
+</ResponseField>
+
+<ResponseField name="phone" type="string" required>
+  Case worker's phone number
+</ResponseField>
+
+<ResponseField name="email" type="string" required>
+  Case worker's email address
+</ResponseField>
+
+## ValidationErrors
+
+Interface for form validation error messages.
+
+<ResponseField name="name" type="string">
+  Error message for name field
+</ResponseField>
+
+<ResponseField name="organization" type="string">
+  Error message for organization field
+</ResponseField>
+
+<ResponseField name="phone" type="string">
+  Error message for phone field
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  Error message for email field
+</ResponseField>
+
+## AuthUser
+
+Interface representing an authenticated user.
+
+<ResponseField name="uid" type="string" required>
+  Unique user identifier from authentication provider
+</ResponseField>
+
+<ResponseField name="email" type="string | null" required>
+  User's email address
+</ResponseField>
+
+<ResponseField name="displayName" type="string | null">
+  User's display name
+</ResponseField>
+
+<ResponseField name="photoURL" type="string | null">
+  URL to user's profile photo
+</ResponseField>
+
+<ResponseField name="emailVerified" type="boolean" required>
+  Whether the user's email has been verified
+</ResponseField>
+
+<ResponseField name="phoneNumber" type="string | null">
+  User's phone number
+</ResponseField>
+
+<ResponseField name="providerId" type="string">
+  Authentication provider ID (e.g., "google.com", "password")
+</ResponseField>
+
+## AuthState
+
+Interface representing the authentication state of the application.
+
+<ResponseField name="user" type="AuthUser | null" required>
+  The currently authenticated user, or null if not authenticated
+</ResponseField>
+
+<ResponseField name="loading" type="boolean" required>
+  Whether authentication state is currently being loaded
+</ResponseField>
+
+<ResponseField name="error" type="AuthError | null">
+  Authentication error, if any
+</ResponseField>
+
+## AuthError
+
+Interface representing an authentication error.
+
+<ResponseField name="code" type="string" required>
+  Error code from authentication provider
+</ResponseField>
+
+<ResponseField name="message" type="string" required>
+  Human-readable error message
+</ResponseField>
+
+## UserType (Enum)
+
+Enum defining the different user roles in the system.
+
+<ResponseField name="Admin" type="string" required>
+  Administrator with full system access
+</ResponseField>
+
+<ResponseField name="Manager" type="string" required>
+  Manager with elevated permissions
+</ResponseField>
+
+<ResponseField name="ClientIntake" type="string" required>
+  Staff member who handles client intake
+</ResponseField>
+
+<ResponseField name="Driver" type="string" required>
+  Volunteer driver
+</ResponseField>
+
+## AuthUserRow
+
+Interface representing a user row in the staff management grid.
+
+<ResponseField name="id" type="string" required>
+  Firestore document ID
+</ResponseField>
+
+<ResponseField name="uid" type="string" required>
+  Authentication user ID (same as id, kept for parity with client grid)
+</ResponseField>
+
+<ResponseField name="name" type="string" required>
+  User's full name
+</ResponseField>
+
+<ResponseField name="role" type="UserType" required>
+  User's role in the system
+</ResponseField>
+
+<ResponseField name="phone" type="string">
+  User's phone number
+</ResponseField>
+
+<ResponseField name="email" type="string" required>
+  User's email address
+</ResponseField>
+
+<ResponseField name="dietaryPreference" type="string">
+  User's dietary preference (for spreadsheet custom column)
+</ResponseField>
+
+## Type Definitions
+
+```typescript
+export interface CaseWorker {
+  id: string;
+  name: string;
+  organization: string;
+  phone: string;
+  email: string;
+}
+
+export interface ValidationErrors {
+  name?: string;
+  organization?: string;
+  phone?: string;
+  email?: string;
+}
+
+export interface AuthUser {
+  uid: string;
+  email: string | null;
+  displayName?: string | null;
+  photoURL?: string | null;
+  emailVerified: boolean;
+  phoneNumber?: string | null;
+  providerId?: string;
+}
+
+export interface AuthState {
+  user: AuthUser | null;
+  loading: boolean;
+  error?: AuthError | null;
+}
+
+export interface AuthError {
+  code: string;
+  message: string;
+}
+
+export enum UserType {
+  Admin = "Admin",
+  Manager = "Manager",
+  ClientIntake = "ClientIntake",
+  Driver = "Driver",
+}
+
+export interface AuthUserRow {
+  id: string;
+  uid: string;
+  name: string;
+  role: UserType;
+  phone?: string;
+  email: string;
+  dietaryPreference?: string;
+}
+```
+
+## Helper Function: canCreateUserType
+
+Determines whether a user with a given role can create a new user with another role.
+
+```typescript
+export const canCreateUserType = (
+  currentUserType: UserType,
+  newUserType: UserType
+): boolean => {
+  switch (currentUserType) {
+    case UserType.Admin:
+      return [UserType.Admin, UserType.Manager, UserType.ClientIntake].includes(newUserType);
+    case UserType.Manager:
+      return newUserType === UserType.ClientIntake;
+    default:
+      return false;
+  }
+};
+```
+
+### Permission Rules
+
+- **Admin** can create: Admin, Manager, ClientIntake
+- **Manager** can create: ClientIntake only
+- **ClientIntake** and **Driver** cannot create new users
+
+## Usage Examples
+
+### Working with UserType Enum
+
+```typescript
+import { UserType, canCreateUserType } from '@/types';
+
+// Check if user can create another user type
+const currentUser = UserType.Admin;
+const canCreateAdmin = canCreateUserType(currentUser, UserType.Admin); // true
+const canCreateManager = canCreateUserType(currentUser, UserType.Manager); // true
+
+// Get all possible user types
+const allUserTypes = Object.values(UserType);
+console.log(allUserTypes); // ['Admin', 'Manager', 'ClientIntake', 'Driver']
+
+// Check user role
+function isAdmin(user: AuthUserRow): boolean {
+  return user.role === UserType.Admin;
+}
+
+function hasManagerAccess(user: AuthUserRow): boolean {
+  return user.role === UserType.Admin || user.role === UserType.Manager;
+}
+```
+
+### Creating a Case Worker
+
+```typescript
+import { CaseWorker, ValidationErrors } from '@/types/user-types';
+
+const newCaseWorker: Omit<CaseWorker, 'id'> = {
+  name: 'Sarah Johnson',
+  organization: 'DC Health Services',
+  phone: '202-555-0123',
+  email: 'sarah.johnson@dchealth.gov'
+};
+
+// Validate case worker data
+function validateCaseWorker(
+  caseWorker: Omit<CaseWorker, 'id'>
+): ValidationErrors {
+  const errors: ValidationErrors = {};
+  
+  if (!caseWorker.name || caseWorker.name.trim().length === 0) {
+    errors.name = 'Name is required';
+  }
+  
+  if (!caseWorker.organization || caseWorker.organization.trim().length === 0) {
+    errors.organization = 'Organization is required';
+  }
+  
+  const phoneRegex = /^\d{3}-\d{3}-\d{4}$/;
+  if (!caseWorker.phone || !phoneRegex.test(caseWorker.phone)) {
+    errors.phone = 'Phone must be in format: XXX-XXX-XXXX';
+  }
+  
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!caseWorker.email || !emailRegex.test(caseWorker.email)) {
+    errors.email = 'Valid email is required';
+  }
+  
+  return errors;
+}
+
+const errors = validateCaseWorker(newCaseWorker);
+if (Object.keys(errors).length === 0) {
+  console.log('Case worker is valid');
+} else {
+  console.error('Validation errors:', errors);
+}
+```
+
+### Managing Authentication State
+
+```typescript
+import { AuthState, AuthUser, AuthError } from '@/types/user-types';
+import { useState, useEffect } from 'react';
+
+function useAuth() {
+  const [authState, setAuthState] = useState<AuthState>({
+    user: null,
+    loading: true,
+    error: null
+  });
+  
+  useEffect(() => {
+    // Subscribe to auth state changes
+    const unsubscribe = onAuthStateChanged((user) => {
+      if (user) {
+        const authUser: AuthUser = {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+          emailVerified: user.emailVerified,
+          phoneNumber: user.phoneNumber,
+          providerId: user.providerData[0]?.providerId
+        };
+        
+        setAuthState({
+          user: authUser,
+          loading: false,
+          error: null
+        });
+      } else {
+        setAuthState({
+          user: null,
+          loading: false,
+          error: null
+        });
+      }
+    }, (error) => {
+      const authError: AuthError = {
+        code: error.code,
+        message: error.message
+      };
+      
+      setAuthState({
+        user: null,
+        loading: false,
+        error: authError
+      });
+    });
+    
+    return () => unsubscribe();
+  }, []);
+  
+  return authState;
+}
+```
+
+### Creating a Staff User Row
+
+```typescript
+import { AuthUserRow, UserType } from '@/types';
+
+const staffMember: AuthUserRow = {
+  id: 'user-123',
+  uid: 'user-123',
+  name: 'Michael Chen',
+  role: UserType.Manager,
+  phone: '202-555-0145',
+  email: 'michael.chen@foodforalldc.org',
+  dietaryPreference: 'Vegetarian'
+};
+
+// Filter staff by role
+function getStaffByRole(staff: AuthUserRow[], role: UserType): AuthUserRow[] {
+  return staff.filter(member => member.role === role);
+}
+
+// Get all admins
+const admins = getStaffByRole(allStaff, UserType.Admin);
+
+// Get all drivers
+const drivers = getStaffByRole(allStaff, UserType.Driver);
+```
+
+### Role-Based Access Control
+
+```typescript
+import { UserType, canCreateUserType } from '@/types';
+
+interface PermissionCheck {
+  canManageClients: boolean;
+  canManageDeliveries: boolean;
+  canManageStaff: boolean;
+  canViewReports: boolean;
+}
+
+function getUserPermissions(userType: UserType): PermissionCheck {
+  switch (userType) {
+    case UserType.Admin:
+      return {
+        canManageClients: true,
+        canManageDeliveries: true,
+        canManageStaff: true,
+        canViewReports: true
+      };
+    
+    case UserType.Manager:
+      return {
+        canManageClients: true,
+        canManageDeliveries: true,
+        canManageStaff: true,
+        canViewReports: true
+      };
+    
+    case UserType.ClientIntake:
+      return {
+        canManageClients: true,
+        canManageDeliveries: false,
+        canManageStaff: false,
+        canViewReports: false
+      };
+    
+    case UserType.Driver:
+      return {
+        canManageClients: false,
+        canManageDeliveries: true,
+        canManageStaff: false,
+        canViewReports: false
+      };
+  }
+}
+
+// Usage
+const permissions = getUserPermissions(UserType.ClientIntake);
+if (permissions.canManageClients) {
+  // Show client management UI
+}
+```
+
+### Handling Authentication Errors
+
+```typescript
+import { AuthError } from '@/types/user-types';
+
+function getAuthErrorMessage(error: AuthError): string {
+  switch (error.code) {
+    case 'auth/user-not-found':
+      return 'No account found with this email address.';
+    
+    case 'auth/wrong-password':
+      return 'Incorrect password. Please try again.';
+    
+    case 'auth/email-already-in-use':
+      return 'An account with this email already exists.';
+    
+    case 'auth/weak-password':
+      return 'Password should be at least 6 characters.';
+    
+    case 'auth/invalid-email':
+      return 'Please enter a valid email address.';
+    
+    case 'auth/operation-not-allowed':
+      return 'This sign-in method is not enabled.';
+    
+    case 'auth/too-many-requests':
+      return 'Too many attempts. Please try again later.';
+    
+    default:
+      return error.message || 'An error occurred during authentication.';
+  }
+}
+```

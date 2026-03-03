@@ -1,0 +1,495 @@
+---
+title: Tech Stack
+description: Detailed technology stack and dependencies for Food For All DC
+---
+
+## Overview
+
+Food For All DC is built with modern web technologies focusing on performance, type safety, and developer experience.
+
+## Frontend Technologies
+
+### Core Framework
+
+#### React 18
+
+- **Version:** `^18.3.1`
+- **Purpose:** UI framework for building component-based interfaces
+- **Why React:** Strong ecosystem, hooks for state management, excellent TypeScript support
+
+```typescript
+import React from 'react';
+
+const MyComponent: React.FC = () => {
+  return <div>Hello World</div>;
+};
+```
+
+#### TypeScript 4.9
+
+- **Version:** `^4.9.5`
+- **Purpose:** Type safety and improved developer experience
+- **Configuration:** Strict mode enabled
+
+```typescript
+// Example: Type-safe client profile
+import { ClientProfile } from '../types';
+
+const updateClient = (client: ClientProfile): Promise<void> => {
+  // TypeScript ensures all required fields are present
+};
+```
+
+<Info>
+All new code must be written in TypeScript. Avoid using `any` type - use proper type definitions from `src/types/`.
+</Info>
+
+### UI & Styling
+
+#### Material UI v7
+
+- **Packages:**
+  - `@mui/material` `^7.2.0`
+  - `@mui/icons-material` `^7.2.0`
+  - `@mui/x-date-pickers` `^8.9.0`
+- **Purpose:** Component library for consistent UI/UX
+- **Customization:** Custom theme with CSS variables
+
+```typescript
+import { Box, Button } from '@mui/material';
+
+<Box sx={{ 
+  backgroundColor: 'var(--color-primary)',
+  padding: 'var(--spacing-md)' 
+}}>
+  <Button variant="contained">Submit</Button>
+</Box>
+```
+
+#### CSS Modules
+
+- **Purpose:** Scoped component styling
+- **Pattern:** One `.module.css` file per component
+- **Variables:** Global CSS variables from `src/styles/theme.css`
+
+```typescript
+// ComponentName.tsx
+import styles from './ComponentName.module.css';
+
+<div className={styles.container}>
+  <h2 className={styles.title}>Title</h2>
+</div>
+```
+
+```css
+/* ComponentName.module.css */
+.container {
+  padding: var(--spacing-md);
+  background-color: var(--color-background-main);
+}
+
+.title {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+}
+```
+
+#### Emotion
+
+- **Packages:**
+  - `@emotion/react` `^11.13.3`
+  - `@emotion/styled` `^11.13.0`
+- **Purpose:** CSS-in-JS for Material UI styling
+- **Usage:** Primarily for MUI `sx` prop
+
+### Routing
+
+#### React Router v6
+
+- **Version:** `^6.30.3`
+- **Purpose:** Client-side routing and navigation
+- **Features:**
+  - Nested routes
+  - Protected routes with role-based access
+  - Lazy loading for code splitting
+
+```typescript
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import ProtectedRoute from './auth/ProtectedRoute';
+import { UserType } from './types';
+
+<Routes>
+  <Route element={<ProtectedRoute allowedRoles={[UserType.Admin]} />}>
+    <Route path="/admin" element={<AdminPage />} />
+  </Route>
+</Routes>
+```
+
+### Calendar & Scheduling
+
+#### DayPilot Calendar
+
+- **Package:** `@daypilot/daypilot-lite-react` `^3.28.0`
+- **Purpose:** Interactive calendar for delivery scheduling
+- **Features:**
+  - Drag-and-drop events
+  - Multiple views (day, week, month)
+  - Recurring events
+
+#### Luxon
+
+- **Version:** `^3.6.1`
+- **Purpose:** Date/time handling and formatting
+- **Why Luxon:** Better than moment.js (deprecated), more intuitive than date-fns
+
+```typescript
+import { DateTime } from 'luxon';
+
+const now = DateTime.now();
+const formatted = now.toFormat('yyyy-MM-dd');
+```
+
+<Note>
+Use Luxon for all date operations. The `TimeUtils` utility in `src/utils/timeUtils.ts` provides common date operations.
+</Note>
+
+### Maps & Geolocation
+
+#### Leaflet
+
+- **Packages:**
+  - `leaflet` `^1.9.4`
+  - `leaflet.awesome-markers` `^2.0.5`
+  - `@types/leaflet` `^1.9.17`
+- **Purpose:** Interactive maps for delivery routes
+- **Features:**
+  - Route visualization
+  - Custom markers for clients
+  - Clustering for dense areas
+
+```typescript
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+const map = L.map('map').setView([38.9072, -77.0369], 13);
+```
+
+### Performance & Virtualization
+
+#### React Virtuoso
+
+- **Version:** `^4.14.1`
+- **Purpose:** Virtual scrolling for large lists
+- **Use Case:** Client spreadsheet with 3000+ rows
+
+```typescript
+import { Virtuoso } from 'react-virtuoso';
+
+<Virtuoso
+  data={clients}
+  itemContent={(index, client) => (
+    <ClientRow client={client} />
+  )}
+/>
+```
+
+<Info>
+Use React Virtuoso for any list with more than 1000 items to maintain 60fps scrolling performance.
+</Info>
+
+### Data Processing
+
+#### PapaParse
+
+- **Version:** `^5.5.2`
+- **Purpose:** CSV parsing and generation
+- **Use Case:** Import/export client data
+
+#### JSZip
+
+- **Version:** `^3.10.1`
+- **Purpose:** Create zip archives for bulk exports
+
+#### FileSaver
+
+- **Version:** `^2.0.5`
+- **Purpose:** Client-side file downloads
+
+```typescript
+import { saveAs } from 'file-saver';
+import Papa from 'papaparse';
+
+const csv = Papa.unparse(data);
+const blob = new Blob([csv], { type: 'text/csv' });
+saveAs(blob, 'clients.csv');
+```
+
+## Backend Technologies
+
+### Firebase
+
+#### Firebase SDK v11
+
+- **Version:** `^11.10.0`
+- **Services Used:**
+  - Firestore - NoSQL database
+  - Authentication - User management
+  - Cloud Functions - Serverless backend
+  - Storage - File uploads (if needed)
+
+```typescript
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { firebaseConfig } from './config/apiKeys';
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+```
+
+#### Firestore Database
+
+**Data Model:**
+
+```typescript
+// Collections
+client-profile2/     // Client profiles
+events/              // Delivery events
+users/               // User accounts
+Drivers2/            // Driver information
+clusters/            // Route clusters
+referral/            // Referral agencies
+limits/              // System quotas
+tags/                // Client tags
+```
+
+**Operations:**
+
+```typescript
+import { 
+  collection, 
+  doc, 
+  getDoc, 
+  getDocs, 
+  setDoc, 
+  updateDoc,
+  deleteDoc,
+  writeBatch,
+  query,
+  orderBy,
+  limit 
+} from 'firebase/firestore';
+
+// Read
+const docRef = doc(db, 'client-profile2', clientId);
+const docSnap = await getDoc(docRef);
+
+// Write
+await setDoc(docRef, data);
+
+// Batch operations
+const batch = writeBatch(db);
+batch.set(doc1, data1);
+batch.update(doc2, data2);
+await batch.commit();
+```
+
+#### Firebase Authentication
+
+```typescript
+import { 
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged 
+} from 'firebase/auth';
+
+// Sign in
+const userCredential = await signInWithEmailAndPassword(
+  auth, 
+  email, 
+  password
+);
+
+// Listen to auth state
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // User is signed in
+  }
+});
+```
+
+#### Cloud Functions (Python)
+
+**Python Version:** 3.11+
+
+**Key Dependencies:**
+- `firebase-admin` - Firebase Admin SDK
+- `google-cloud-firestore` - Firestore client
+- `googlemaps` - Google Maps API client
+- `scikit-learn` - Clustering algorithms
+
+**Function Types:**
+
+```python
+# HTTP-triggered function
+@https_fn.on_request()
+def geocode_address(req: https_fn.Request) -> https_fn.Response:
+    # Geocoding logic
+    pass
+
+# Scheduled function
+@scheduler_fn.on_schedule(schedule="0 2 * * *")
+def daily_delivery_update(event):
+    # Daily processing
+    pass
+```
+
+### External APIs
+
+#### Google Maps API
+
+- **Purpose:** Geocoding and mapping
+- **Configuration:** API key in `src/config/apiKeys.ts`
+- **Usage:** Address validation, coordinates conversion
+
+#### DC Ward API (Optional)
+
+- **Purpose:** Determine DC ward from address
+- **Configuration:** Optional API key
+
+## Development Tools
+
+### Build Tools
+
+#### React Scripts
+
+- **Version:** `^5.0.1`
+- **Purpose:** Build tooling (Webpack, Babel, etc.)
+- **Commands:**
+  - `npm start` - Development server
+  - `npm run build` - Production build
+  - `npm run eject` - Eject from Create React App (not recommended)
+
+### Code Quality
+
+#### ESLint
+
+- **Version:** `^8.51.0`
+- **Plugins:**
+  - `@typescript-eslint/eslint-plugin` `^5.5.0`
+  - `eslint-plugin-react` `^7.33.2`
+  - `eslint-plugin-react-hooks` `^4.6.0`
+
+```bash
+npm run lint       # Check for issues
+npm run lint:fix   # Auto-fix issues
+```
+
+#### Prettier
+
+- **Version:** `^3.3.3`
+- **Purpose:** Code formatting
+
+```bash
+npm run format     # Format all files
+```
+
+### TypeScript Types
+
+**Type Packages:**
+
+```json
+{
+  "@types/node": "^16.18.112",
+  "@types/react": "^18.3.11",
+  "@types/react-dom": "^18.3.0",
+  "@types/react-datepicker": "^6.2.0",
+  "@types/file-saver": "^2.0.7",
+  "@types/google.maps": "^3.58.1",
+  "@types/jszip": "^3.4.0",
+  "@types/leaflet": "^1.9.17",
+  "@types/luxon": "^3.6.2",
+  "@types/papaparse": "^5.3.15"
+}
+```
+
+## Environment Setup
+
+### Prerequisites
+
+- **Node.js:** v16+ (recommended: v18+)
+- **npm:** v8+ (comes with Node.js)
+- **Python:** 3.11+ (for Cloud Functions)
+- **Firebase CLI:** Latest version
+
+### Installation
+
+```bash
+# Clone repository
+git clone <repo-url>
+cd food-for-all-dc/my-app
+
+# Install frontend dependencies
+npm install
+
+# Install Firebase CLI (optional)
+npm install -g firebase-tools
+firebase login
+
+# Setup Python environment (optional)
+cd functions-python
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Environment Variables
+
+Create a `.env` file in `my-app/` directory:
+
+```bash
+# Firebase Configuration
+REACT_APP_FIREBASE_API_KEY=your-api-key
+REACT_APP_FIREBASE_AUTH_DOMAIN=your-auth-domain
+REACT_APP_FIREBASE_PROJECT_ID=your-project-id
+REACT_APP_FIREBASE_STORAGE_BUCKET=your-storage-bucket
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+REACT_APP_FIREBASE_APP_ID=your-app-id
+REACT_APP_FIREBASE_MEASUREMENT_ID=your-measurement-id
+
+# External APIs
+REACT_APP_GOOGLE_MAPS_API_KEY=your-maps-key
+REACT_APP_DC_WARD_API_KEY=your-ward-key  # Optional
+```
+
+<Warning>
+Never commit `.env` files to version control. Always use `.env.example` as a template.
+</Warning>
+
+## Browser Support
+
+### Production
+
+- Chrome, Firefox, Safari, Edge (latest versions)
+- >0.2% market share
+- No IE11 support
+
+### Development
+
+- Latest Chrome
+- Latest Firefox
+- Latest Safari
+
+## Performance Targets
+
+- **Initial Load:** < 3 seconds
+- **Time to Interactive:** < 5 seconds
+- **Lighthouse Score:** > 90
+- **List Scrolling:** 60fps (with virtualization)
+
+## Next Steps
+
+- [Architecture](/development/architecture) - System architecture overview
+- [Project Structure](/development/project-structure) - Code organization
+- [Contributing](/development/contributing) - Development workflow

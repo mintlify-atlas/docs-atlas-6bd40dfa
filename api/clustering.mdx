@@ -1,0 +1,317 @@
+---
+title: "Clustering Function"
+description: "Group delivery locations into optimized driver routes using K-means clustering"
+---
+
+## Overview
+
+The `cluster_deliveries_k_means` function groups delivery coordinates into clusters using constrained K-means clustering. This enables efficient route assignment by ensuring each driver receives a balanced number of deliveries.
+
+## Endpoint
+
+```
+POST https://us-central1-food-for-all-dc-caf23.cloudfunctions.net/cluster_deliveries_k_means
+```
+
+**Region:** `us-central1`  
+**Memory:** 512 MB  
+**Timeout:** 300 seconds
+
+## Authentication
+
+This endpoint requires Firebase Authentication. Include a valid Firebase ID token in the Authorization header.
+
+```
+Authorization: Bearer <firebase-id-token>
+```
+
+## Request
+
+<ParamField body="coords" type="array" required>
+  Array of coordinate tuples `[latitude, longitude]` representing delivery locations.
+  
+  **Constraints:**
+  - Maximum 5000 coordinates per request
+  - Each coordinate must be a tuple of two floats: `[lat, lng]`
+</ParamField>
+
+<ParamField body="drivers_count" type="integer" required>
+  Number of drivers (clusters) to create.
+  
+  **Constraints:**
+  - Must be greater than 0
+  - Maximum 500 drivers
+  - If greater than the number of deliveries, automatically adjusted to match delivery count
+</ParamField>
+
+<ParamField body="min_deliveries" type="integer" required>
+  Minimum number of deliveries per driver.
+  
+  **Constraints:**
+  - Must be greater than 0
+  - Cannot exceed `max_deliveries`
+</ParamField>
+
+<ParamField body="max_deliveries" type="integer" required>
+  Maximum number of deliveries per driver.
+  
+  **Constraints:**
+  - Must be greater than 0
+  - Must be greater than or equal to `min_deliveries`
+</ParamField>
+
+### Request Example
+
+<CodeGroup>
+```json Request Body
+{
+  "coords": [
+    [38.8976763, -77.0365298],
+    [38.8867217, -77.0047576],
+    [38.8794449, -76.9963331],
+    [38.9071923, -77.0368707],
+    [38.8951100, -77.0363700],
+    [38.8813900, -77.0040400]
+  ],
+  "drivers_count": 2,
+  "min_deliveries": 2,
+  "max_deliveries": 4
+}
+```
+
+```javascript JavaScript/TypeScript
+const clusterDeliveries = async (coords, driversCount, minDeliveries, maxDeliveries) => {
+  const user = auth.currentUser;
+  const token = await user.getIdToken();
+  
+  const response = await fetch(
+    'https://us-central1-food-for-all-dc-caf23.cloudfunctions.net/cluster_deliveries_k_means',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        coords,
+        drivers_count: driversCount,
+        min_deliveries: minDeliveries,
+        max_deliveries: maxDeliveries
+      })
+    }
+  );
+  
+  return await response.json();
+};
+
+// Usage
+const result = await clusterDeliveries(
+  [
+    [38.8976763, -77.0365298],
+    [38.8867217, -77.0047576],
+    [38.8794449, -76.9963331],
+    [38.9071923, -77.0368707]
+  ],
+  2,  // drivers_count
+  1,  // min_deliveries
+  3   // max_deliveries
+);
+console.log(result.clusters);
+```
+
+```python Python
+import requests
+
+def cluster_deliveries(coords, drivers_count, min_deliveries, max_deliveries, id_token):
+    url = 'https://us-central1-food-for-all-dc-caf23.cloudfunctions.net/cluster_deliveries_k_means'
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {id_token}'
+    }
+    payload = {
+        'coords': coords,
+        'drivers_count': drivers_count,
+        'min_deliveries': min_deliveries,
+        'max_deliveries': max_deliveries
+    }
+    
+    response = requests.post(url, json=payload, headers=headers)
+    return response.json()
+
+# Usage
+result = cluster_deliveries(
+    coords=[
+        [38.8976763, -77.0365298],
+        [38.8867217, -77.0047576],
+        [38.8794449, -76.9963331]
+    ],
+    drivers_count=2,
+    min_deliveries=1,
+    max_deliveries=2,
+    id_token=firebase_id_token
+)
+print(result['clusters'])
+```
+
+```bash cURL
+curl -X POST \
+  https://us-central1-food-for-all-dc-caf23.cloudfunctions.net/cluster_deliveries_k_means \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_FIREBASE_ID_TOKEN" \
+  -d '{
+    "coords": [
+      [38.8976763, -77.0365298],
+      [38.8867217, -77.0047576],
+      [38.8794449, -76.9963331],
+      [38.9071923, -77.0368707]
+    ],
+    "drivers_count": 2,
+    "min_deliveries": 1,
+    "max_deliveries": 3
+  }'
+```
+</CodeGroup>
+
+## Response
+
+<ResponseField name="clusters" type="object">
+  Object mapping cluster IDs (driver numbers) to arrays of delivery indices.
+  
+  - Keys are cluster IDs as strings (e.g., "1", "2", "3")
+  - Values are arrays of indices from the input `coords` array
+  - Each index represents a delivery assigned to that driver
+</ResponseField>
+
+### Success Response
+
+<CodeGroup>
+```json 201 Created
+{
+  "clusters": {
+    "1": [0, 3, 4],
+    "2": [1, 2, 5]
+  }
+}
+```
+</CodeGroup>
+
+In this example:
+- Driver 1 receives deliveries at indices 0, 3, and 4
+- Driver 2 receives deliveries at indices 1, 2, and 5
+
+## Error Responses
+
+<ResponseField name="error" type="string">
+  Human-readable error message describing what went wrong.
+</ResponseField>
+
+<ResponseField name="details" type="array">
+  Array of validation error objects (only present for validation errors).
+  
+  Each error object contains:
+  - `field`: The field that failed validation
+  - `message`: Description of the validation error
+</ResponseField>
+
+### Error Examples
+
+<CodeGroup>
+```json 401 Unauthorized
+{
+  "error": "Authentication required."
+}
+```
+
+```json 400 Validation Error
+{
+  "error": "Validation error",
+  "details": [
+    {
+      "field": "coords",
+      "message": "field required"
+    }
+  ]
+}
+```
+
+```json 400 Too Many Coordinates
+{
+  "error": "Too many coordinates in request."
+}
+```
+
+```json 400 Too Many Drivers
+{
+  "error": "Too many drivers requested."
+}
+```
+
+```json 400 Invalid Parameters
+{
+  "error": "Invalid clustering parameters."
+}
+```
+
+```json 400 Min/Max Constraint
+{
+  "error": "min_deliveries cannot exceed max_deliveries."
+}
+```
+
+```json 500 Internal Error
+{
+  "error": "Internal server error."
+}
+```
+</CodeGroup>
+
+## HTTP Status Codes
+
+| Status | Description |
+|--------|-------------|
+| `201` | Successfully created delivery clusters |
+| `204` | OPTIONS preflight request successful |
+| `400` | Invalid request (validation error, parameter constraints violated) |
+| `401` | Authentication required or invalid token |
+| `405` | Method not allowed (only POST and OPTIONS supported) |
+| `500` | Internal server error |
+
+## CORS Configuration
+
+The function allows requests from:
+- `http://localhost:3000` (local development)
+- `https://food-for-all-dc-caf23.web.app` (production)
+- `https://food-for-all-dc-caf23.firebaseapp.com` (production)
+
+## Implementation Details
+
+**Source:** `functions-python/clustering.py:236`
+
+The function:
+1. Validates authentication token
+2. Validates request payload and parameter constraints
+3. Converts lat/lng coordinates to 3D Cartesian coordinates for accurate distance calculation
+4. Applies constrained K-means clustering using the `k-means-constrained` library
+5. Groups delivery indices by cluster ID
+6. Returns cluster assignments as a dictionary
+
+### Algorithm
+
+The function uses **constrained K-means clustering** with:
+- **Cartesian conversion:** Lat/lng pairs are converted to 3D Cartesian coordinates using Earth's radius (6371 km) for accurate geographic distance calculations
+- **Size constraints:** Each cluster respects `min_deliveries` and `max_deliveries` constraints
+- **Automatic adjustment:** If `drivers_count` exceeds the number of deliveries, it's automatically reduced
+- **Random state:** Fixed at 42 for reproducible results
+
+## Rate Limits
+
+- **Maximum coordinates:** 5000 per request
+- **Maximum drivers:** 500 per request
+- **Function timeout:** 300 seconds
+
+## Notes
+
+- Cluster IDs start at "1" (not "0")
+- If the number of drivers exceeds deliveries, the function automatically adjusts to create one cluster per delivery
+- The clustering algorithm ensures balanced workload distribution while minimizing total distance
+- Coordinates are converted to Cartesian space to account for Earth's curvature in distance calculations
