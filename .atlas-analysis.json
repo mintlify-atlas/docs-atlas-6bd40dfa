@@ -1,0 +1,112 @@
+{
+  "projectType": "saas",
+  "projectName": "Food For All DC",
+  "projectDescription": "Client management and delivery scheduling platform for Food For All DC nonprofit",
+  "theme": "almond",
+  "primaryColor": "#257E68",
+  "lightColor": "#3B9B7F",
+  "darkColor": "#1A5F4C",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Core Features",
+            "pages": [
+              "features/client-management",
+              "features/calendar-scheduling",
+              "features/route-optimization",
+              "features/reporting",
+              "features/user-roles"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/authentication",
+              "guides/client-intake",
+              "guides/delivery-management",
+              "guides/route-planning",
+              "guides/generating-reports"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "development/architecture",
+              "development/tech-stack",
+              "development/project-structure",
+              "development/contributing",
+              "development/styling-guide"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Services",
+            "pages": [
+              "api/client-service",
+              "api/delivery-service",
+              "api/driver-service",
+              "api/auth-service"
+            ]
+          },
+          {
+            "group": "Cloud Functions",
+            "pages": [
+              "api/geocoding",
+              "api/clustering",
+              "api/user-management",
+              "api/scheduled-tasks"
+            ]
+          },
+          {
+            "group": "Types",
+            "pages": [
+              "api/types/client-types",
+              "api/types/delivery-types",
+              "api/types/user-types"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Client profile management with intake forms",
+    "Interactive calendar for delivery scheduling",
+    "Route optimization with clustering algorithms",
+    "Comprehensive reporting (summary, client, referral agencies)",
+    "Role-based access control (Admin, Manager, ClientIntake, Driver)",
+    "Real-time delivery tracking and notifications",
+    "Geocoding and mapping integration",
+    "Firebase backend with Firestore database"
+  ],
+  "publicApiSurface": [
+    "ClientService.getInstance()",
+    "DeliveryService.getInstance()",
+    "DriverService.getInstance()",
+    "AuthUserService.getInstance()",
+    "geocode_addresses_endpoint",
+    "cluster_deliveries_k_means",
+    "deleteUserAccount",
+    "updateDeliveriesDaily",
+    "ProtectedRoute",
+    "useAuth",
+    "usePerformanceMonitor",
+    "ClientDataProvider",
+    "NotificationProvider"
+  ]
+}
